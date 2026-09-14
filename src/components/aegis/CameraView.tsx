@@ -91,7 +91,7 @@ export default function CameraView({ camera, isTracking, showOverlay, className,
       )}
 
       {/* Error state */}
-      {error && permissionState !== "denied" && permissionState !== "unavailable" && (
+      {error && (
         <div className="absolute inset-x-3 bottom-3 rounded-lg bg-error-50 p-3 border border-error-200">
           <p className="text-xs text-error-700">{error}</p>
         </div>

@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { useDropzone } from "react-dropzone";
+import { useDropzone, type FileRejection } from "react-dropzone";
 
 const MAX_SIZE_MB = 10;
 const ACCEPTED_TYPES = { "image/jpeg": [".jpg", ".jpeg"], "image/png": [".png"], "image/webp": [".webp"] };
@@ -19,7 +19,7 @@ export default function ScanUpload({ onFile, disabled, className }: ScanUploadPr
   const onDrop = useCallback(
     (
       accepted: File[],
-      rejected: { file: File; errors: { code: string; message: string }[] }[]
+      rejected: FileRejection[]
     ) => {
       setFileError(null);
       if (rejected.length > 0) {

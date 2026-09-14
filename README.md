@@ -1,157 +1,231 @@
-# TailAdmin React - Free React Tailwind Admin Dashboard Template
+# AegisHub Frontend
 
-TailAdmin is a free and open-source admin dashboard template built on **React and Tailwind CSS**, providing developers with everything they need to create a comprehensive, data-driven back-end, 
-dashboard, or admin panel solution for upcoming web projects.
-
-With TailAdmin, you get access to all the necessary dashboard UI components, elements, and pages required to build a feature-rich and complete dashboard or admin panel. Whether you're building dashboard or admin panel for a complex web application or a simple website, TailAdmin is the perfect solution to help you get up and running quickly.
-
-![TailAdmin React.js Dashboard Preview](./banner.png)
+Accessible health gateway featuring real-time sign language interpretation, live captioning, and AI-powered dermatological triage. Built for **GatewayHacks 2026 -- Track 1: Accessibility & Health**.
 
 ## Overview
 
-TailAdmin provides essential UI components and layouts for building feature-rich, data-driven admin dashboards and control panels. It's built on:
+AegisHub is a client-side React application that connects to backend AI services to provide three core accessibility and health tools:
 
-- React 18 (create-react-app)
-- TypeScript
-- Tailwind CSS
+| Tool | Route | Input | What it does |
+|------|-------|-------|-------------|
+| **Sign Language Interpreter** | `/sign-interpreter` | Camera (hand landmarks) | Captures 21-point hand landmarks from the device camera and sends lightweight coordinate data to a classification endpoint. Returns a sign gloss with confidence score and alternatives. No raw video ever leaves the device. |
+| **Live Captioner** | `/captioner` | Microphone (speech audio) | Streams audio for real-time speech-to-text transcription. Produces live captions with partial/final utterance states, speaker activity detection, configurable font size, high-contrast mode, and auto-scroll. |
+| **Derma-Scan** | `/derma-scan` | Image upload (JPG/PNG/WebP, max 10 MB) | Accepts drag-and-drop or click-to-upload images. Sends a compressed image to an AI analysis endpoint and returns a structured observation with triage tier, plain-language guidance, confidence band, and skin-tone caveat. |
 
-### Quick Links
-- [✨ Visit Website](https://tailadmin.com)
-- [📄 Documentation](https://tailadmin.com/docs)
-- [⬇️ Download](https://tailadmin.com/download)
-- [🖌️ Figma Design File (Community Edition)](https://www.figma.com/community/file/1214477970819985778)
-- [⚡ Get PRO Version](https://tailadmin.com/pricing)
+All three tools run in **mock mode** by default, returning simulated data so the UI can be developed and demonstrated without a live backend. Toggle to real API calls by setting `USE_MOCK_API = false` in `src/lib/types/api.ts` and providing `VITE_API_BASE_URL`.
 
-### Demos
-- [Free Version](https://free-react-demo.tailadmin.com/)
-- [Pro Version](https://react-demo.tailadmin.com)
+## Tech Stack
 
-### Other Versions
-- [HTML Version](https://github.com/TailAdmin/tailadmin-free-tailwind-dashboard-template)
-- [Next.js Version](https://github.com/TailAdmin/free-nextjs-admin-dashboard)
-- [Vue.js Version](https://github.com/TailAdmin/vue-tailwind-admin-dashboard)
+- **React 18** with TypeScript
+- **Tailwind CSS 3.4** with custom design tokens (light + dark themes)
+- **Vite 6** for fast builds
+- **React Router 7** for client-side routing
+- **React Dropzone** for image uploads
+- **React Helmet Async** for SEO / page metadata
 
-
-## Installation
+## Getting Started
 
 ### Prerequisites
-To get started with TailAdmin, ensure you have the following prerequisites installed and set up:
 
-- Node.js 18.x or later (recommended to use Node.js 20.x or later)
+- Node.js 18+ (recommended 20+)
 
-### Cloning the Repository
-Clone the repository using the following command:
+### Install
 
 ```bash
-git clone https://github.com/TailAdmin/free-react-tailwind-admin-dashboard.git
+git clone https://github.com/AegisHub-Gateway/aegishub-frontend.git
+cd aegishub-frontend
+npm install
 ```
 
-> Windows Users: place the repository near the root of your drive if you face issues while cloning.
+### Development
 
-1. Install dependencies:
-    ```bash
-    npm install
-    # or
-    yarn install
-    ```
-    > On `npm` some included packages can cause peer-deps issue with React 18 while installing.
-    >
-    > Use the `--legacy-peer-deps` flag, at the end of the installation command, as a workaround for that.
+```bash
+npm run dev
+```
 
-2. Start the development server:
-    ```bash
-    npm run dev
-    # or
-    yarn dev
-    ```
+Opens at `http://localhost:5173`.
 
-## Components
+### Production Build
 
-TailAdmin is a pre-designed starting point for building a web-based dashboard using React.js and Tailwind CSS. The template includes:
+```bash
+npm run build
+npm run preview
+```
 
-- Sophisticated and accessible sidebar
-- Data visualization components
-- Prebuilt profile management and 404 page
-- Tables and Charts(Line and Bar)
-- Authentication forms and input elements
-- Alerts, Dropdowns, Modals, Buttons and more
-- Can't forget Dark Mode 🕶️
+### Lint
 
-All components are built with React and styled using Tailwind CSS for easy customization.
+```bash
+npm run lint
+```
 
-## Feature Comparison
+## Environment Variables
 
-### Free Version
-- 1 Unique Dashboard
-- 30+ dashboard components
-- 50+ UI elements
-- Basic Figma design files
-- Community support
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `VITE_API_BASE_URL` | `""` (empty) | Base URL of the AegisHub backend API. When empty, mock data is used. |
 
-### Pro Version
-- 5 Unique Dashboards: Analytics, Ecommerce, Marketing, CRM, Stocks (more coming soon)
-- 400+ dashboard components and UI elements
-- Complete Figma design file
-- Email support
+Create a `.env` file in the project root:
 
-To learn more about pro version features and pricing, visit our [pricing page](https://tailadmin.com/pricing).
+```
+VITE_API_BASE_URL=https://your-api.example.com
+```
 
-## Changelog
+## Architecture
 
-### Version 2.0.0 - [February 2025]
-A major update with comprehensive redesign and modern React patterns implementation.
+```
+src/
+  App.tsx                    # Route definitions
+  main.tsx                   # Entry point (providers: Theme > Auth > Helmet)
 
-#### Major Improvements
-- Complete UI redesign with modern React patterns
-- New features: collapsible sidebar, chat, and calendar
-- Improved performance and accessibility
-- Updated data visualization using ApexCharts
+  context/
+    AuthContext.tsx           # Client-side auth (localStorage), sign in / sign out / profile
+    SidebarContext.tsx        # Sidebar open/close state
+    ThemeContext.tsx           # Light/dark theme via localStorage
 
-#### Key Features
-- Redesigned dashboards (Ecommerce, Analytics, Marketing, CRM)
-- Enhanced navigation with React Router integration
-- Advanced tables with sorting and filtering
-- Calendar with drag-and-drop support
-- New UI components and improved existing ones
+  layout/
+    AppLayout.tsx             # App shell: sidebar + header + content outlet
+    AppSidebar.tsx            # Sidebar navigation with workspace + system links
+    AppHeader.tsx             # Sticky header with mobile menu, theme toggle, avatar
 
-#### Breaking Changes
-- Updated sidebar component API
-- Migrated charts to ApexCharts
-- Revised authentication system
+  pages/
+    Home/                     # Marketing homepage (hero, tools, data flow, FAQ, footer)
+    Dashboard/                # Authenticated dashboard with tool cards + recent activity
+    SignInterpreter/          # Camera + hand landmarks + classify workflow
+    Captioner/                # Microphone + live caption streaming
+    DermaScan/                # Image upload + analysis + results display
+    History/                  # Session history with detail modals
+    Settings/                 # Theme, accessibility, privacy, app info
+    Help/                     # Emergency info, AI disclaimer, FAQ, support links
+    AuthPages/                # Sign in, sign up, profile setup wizard
+    OtherPage/                # 404 not found
 
-[Read more](https://tailadmin.com/docs/update-logs/react) on this release.
+  components/
+    aegis/                    # Reusable AegisHub components
+      CameraView.tsx          # Camera feed with permission states + overlays
+      HandLandmarkOverlay.tsx # Canvas-based 21-point hand landmark visualization
+      ScanUpload.tsx          # Drag-and-drop image upload (react-dropzone)
+      PermissionState.tsx     # Camera/mic permission denied/unavailable states
+      CaptionDisplay.tsx      # Caption display component
+      ConfidenceIndicator.tsx # Confidence bar/meter
+      EmergencyBanner.tsx     # Medical emergency banner
+      EmptyState.tsx          # Empty state placeholder
+      InterpretationResult.tsx# Sign interpretation result card
+      ModalityCard.tsx        # Tool entry card with status
+      SafetyDisclaimer.tsx    # Medical disclaimer (compact + full)
+      ScanResult.tsx          # Derma-Scan result display
+      SessionStatus.tsx       # Session status indicator
+      Spinner.tsx             # Loading spinner
 
-### Version 1.3.7 - [June 20, 2024]
+    auth/
+      SignInForm.tsx          # Email/password sign-in form
+      SignUpForm.tsx          # First/last name + email sign-up form
 
-#### Enhancements
+    common/
+      PageMeta.tsx            # Page title/description via react-helmet
+      ScrollToTop.tsx         # Scrolls to top on route change
 
-1. Remove Repetition of DefaultLayout in every Pages
-2. Add ClickOutside Component for reduce repeated functionality in Header Message, Notification and User Dropdowns.
+  lib/
+    api/
+      sign.ts                 # Sign language classification (mock + real)
+      caption.ts              # Live caption streaming (mock)
+      derma.ts                # Dermatology analysis (mock + real)
+    hooks/
+      useCamera.ts            # Camera access (getUserMedia)
+      useMicrophone.ts        # Microphone access (getUserMedia)
+      useHandLandmarks.ts     # Mock hand landmark tracking (21-point MediaPipe topology)
+      useGreetingName.ts      # Display name from AuthContext
+      useScrollReveal.ts      # IntersectionObserver scroll animation
+    types/
+      api.ts                  # USE_MOCK_API flag, API_BASE_URL, error/result types
+      sign.ts                 # HandFrame, SignClassificationRequest/Response
+      caption.ts              # CaptionResponse, CaptionUtterance, CaptionSettings
+      derma.ts                # DermaAnalysisResponse, triage types
+    utils/
+      cn.ts                   # clsx + tailwind-merge utility
 
-### Version 1.3.6 - [Jan 31, 2024]
+  styles/
+    tokens.css                # CSS custom properties for light + dark themes
+    globals.css               # Font imports, type scale, animations, focus-ring
+```
 
-#### Enhancements
+## API Integration
 
-1. Integrate flatpickr in [Date Picker/Form Elements]
-2. Change color after select an option [Select Element/Form Elements].
-3. Make it functional [Multiselect Dropdown/Form Elements].
-4. Make best value editable [Pricing Table One/Pricing Table].
-5. Rearrange Folder structure.
+Each tool module (`sign.ts`, `caption.ts`, `derma.ts`) contains both a **mock implementation** and a **real implementation**, gated by `USE_MOCK_API` in `src/lib/types/api.ts`.
 
-### Version 1.2.0 - [Apr 28, 2023]
+### Sign Language Classification
 
-- Add Typescript in TailAdmin React.
+```
+POST /v1/sign/classify
+Body: { frame: HandFrame, handedness: "left" | "right" }
+Response: { gloss: string, confidence: number, alternatives: SignAlternative[] }
+```
 
-### Version 1.0.0 - Initial Release - [Mar 13, 2023]
+### Dermatology Analysis
 
-- Initial release of TailAdmin React.
+```
+POST /v1/derma/analyze
+Body: FormData with compressed image
+Response: { tier: "low_concern" | "monitor" | "seek_evaluation" | "urgent", guidance: string, confidence_band: string, skin_tone_caveat: string }
+```
 
+### Live Captioning
 
+```
+Mock only -- streams simulated caption utterances.
+```
+
+## Design System
+
+The app uses CSS custom properties defined in `src/styles/tokens.css` to power both light and dark themes. Tailwind is configured to reference these tokens, giving you a consistent design language across the entire UI.
+
+**Typography:**
+- Headings: Outfit (Google Fonts)
+- Body: Source Serif 4 (Google Fonts)
+- Code/Numbers: JetBrains Mono (Google Fonts)
+
+**Key conventions:**
+- `.focus-ring` class provides visible focus outlines for keyboard navigation
+- `prefers-reduced-motion` collapses all animations
+- `aria-*` attributes used throughout for screen readers
+
+## Features
+
+- **Dark mode** with system preference detection and manual toggle
+- **Responsive** mobile-first layout with collapsible sidebar
+- **Client-side auth** (localStorage) with sign in, sign up, and multi-step profile setup
+- **Medical safety disclaimers** displayed prominently on every tool page
+- **Camera/mic permission handling** with clear denied/unavailable/unsupported states
+- **Hand landmark visualization** rendered on a canvas overlay
+- **Image upload** with drag-and-drop, file type validation, and size limits
+- **Session history** with filterable entries and detail modals
+- **Settings** for theme, accessibility preferences, and privacy info
+
+## Project Structure
+
+```
+aegishub-frontend/
+  index.html
+  vite.config.ts
+  tailwind.config.js
+  tsconfig.json
+  package.json
+  public/
+    favicon.png
+    images/
+      error/        # 404 page SVGs
+      logo/         # Auth logo
+  src/
+    ...
+```
 
 ## License
 
-TailAdmin React.js Free Version is released under the MIT License.
+MIT
 
-## Support
+## Contributing
 
-If you find this project helpful, please consider giving it a star on GitHub. Your support helps us continue developing and maintaining this template.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/my-feature`)
+3. Commit your changes (`git commit -m "Add my feature"`)
+4. Push to the branch (`git push origin feature/my-feature`)
+5. Open a Pull Request
