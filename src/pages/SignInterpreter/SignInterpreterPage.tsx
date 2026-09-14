@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import CameraView from "../../components/aegis/CameraView";
 import HandLandmarkOverlay from "../../components/aegis/HandLandmarkOverlay";
@@ -6,11 +6,6 @@ import { useCamera } from "../../lib/hooks/useCamera";
 import { useHandLandmarks } from "../../lib/hooks/useHandLandmarks";
 import { signApi } from "../../lib/api/sign";
 import type { SignClassificationResponse, SignSessionState } from "../../lib/types/sign";
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Sign Language Interpreter — DESIGN.md v1.0
-   Camera is primary. Everything else is secondary.
-───────────────────────────────────────────────────────────────────────────── */
 
 function StatusDot({ active }: { active: boolean }) {
   return (
@@ -28,19 +23,16 @@ export default function SignInterpreterPage() {
   const [sessionState, setSessionState] = useState<SignSessionState>("idle");
   const [result, setResult] = useState<SignClassificationResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const isRunning = useRef(false);
 
   const handleStart = async () => {
     setResult(null);
     setError(null);
     await camera.startCamera();
-    landmarks.startTracking();
+    landmarks.startTracking(camera.videoRef);
     setSessionState("active");
-    isRunning.current = true;
   };
 
   const handleStop = () => {
-    isRunning.current = false;
     camera.stopCamera();
     landmarks.stopTracking();
     landmarks.clearFrames();
@@ -87,7 +79,6 @@ export default function SignInterpreterPage() {
               Translate ASL to text in real time.
             </p>
           </div>
-          {/* Privacy badge */}
           <span
             className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-label-sm"
             style={{ borderColor: "var(--color-border)", color: "var(--color-text-muted)" }}
@@ -210,7 +201,6 @@ export default function SignInterpreterPage() {
               Interpretation
             </div>
 
-            {/* Primary gloss */}
             <p
               className="text-display-md mb-1"
               style={{ fontFamily: "var(--font-display)", color: "var(--color-text-primary)" }}
@@ -220,7 +210,6 @@ export default function SignInterpreterPage() {
               {result.gloss}
             </p>
 
-            {/* Confidence */}
             <div className="mb-4 flex items-center gap-3">
               <span
                 className="text-mono font-semibold"
@@ -233,7 +222,6 @@ export default function SignInterpreterPage() {
               </span>
             </div>
 
-            {/* Alternatives */}
             {result.alternatives.length > 0 && (
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-body-sm" style={{ color: "var(--color-text-muted)" }}>Possible:</span>
@@ -249,7 +237,6 @@ export default function SignInterpreterPage() {
               </div>
             )}
 
-            {/* Below-threshold warning */}
             {result.below_threshold && (
               <p
                 className="mt-4 rounded-md border px-3 py-2 text-body-sm"

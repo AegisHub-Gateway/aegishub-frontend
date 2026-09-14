@@ -1,7 +1,12 @@
+export interface LandmarkPoint {
+  x: number;
+  y: number;
+  z: number;
+}
+
 export interface HandFrame {
-  timestamp: number;
-  leftHand?: number[][];
-  rightHand?: number[][];
+  left_hand: LandmarkPoint[];
+  right_hand: LandmarkPoint[];
 }
 
 export interface SignClassificationRequest {
@@ -13,6 +18,13 @@ export interface SignClassificationResponse {
   confidence: number;
   alternatives: string[];
   below_threshold: boolean;
+}
+
+export interface HealthResponse {
+  status: string;
+  service: string;
+  model_version: string;
+  model_loaded: boolean;
 }
 
 export type SignSessionState =

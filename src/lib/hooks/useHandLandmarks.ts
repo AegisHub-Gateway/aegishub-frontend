@@ -1,15 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { HandFrame } from "../types/sign";
+import { getHandLandmarker, detectHands } from "../hand-landmarker";
+import { resultToHandFrame } from "../landmark-mapping";
 
-export interface HandLandmark {
-  x: number;
-  y: number;
-  z: number;
-}
+const SEQUENCE_LENGTH = 30;
 
 export interface HandLandmarkData {
-  leftHand: HandLandmark[] | null;
-  rightHand: HandLandmark[] | null;
+  leftHand: { x: number; y: number; z: number }[] | null;
+  rightHand: { x: number; y: number; z: number }[] | null;
   timestamp: number;
 }
 
@@ -18,69 +16,95 @@ export interface UseHandLandmarksReturn {
   isTracking: boolean;
   handCount: number;
   frames: HandFrame[];
-  startTracking: () => void;
+  startTracking: (videoRef: React.RefObject<HTMLVideoElement | null>) => void;
   stopTracking: () => void;
   clearFrames: () => void;
-}
-
-// Mock landmark generator — 21 points per hand (MediaPipe topology)
-function generateMockHand(baseX: number, baseY: number): HandLandmark[] {
-  const t = Date.now() / 1000;
-  return Array.from({ length: 21 }, (_, i) => ({
-    x: baseX + (i % 5) * 0.04 + Math.sin(t + i) * 0.01,
-    y: baseY + Math.floor(i / 5) * 0.05 + Math.cos(t + i * 0.5) * 0.01,
-    z: -0.05 + Math.random() * 0.02,
-  }));
 }
 
 export function useHandLandmarks(): UseHandLandmarksReturn {
   const [landmarks, setLandmarks] = useState<HandLandmarkData | null>(null);
   const [isTracking, setIsTracking] = useState(false);
   const [frames, setFrames] = useState<HandFrame[]>([]);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const startTracking = useCallback(() => {
-    setIsTracking(true);
-    setFrames([]);
-    intervalRef.current = setInterval(() => {
-      const ts = Date.now();
-      const showLeft = Math.random() > 0.3;
-      const showRight = Math.random() > 0.4;
-      const data: HandLandmarkData = {
-        leftHand: showLeft ? generateMockHand(0.25, 0.3) : null,
-        rightHand: showRight ? generateMockHand(0.55, 0.3) : null,
-        timestamp: ts,
-      };
-      setLandmarks(data);
-      setFrames((prev) => {
-        const frame: HandFrame = {
-          timestamp: ts,
-          leftHand: data.leftHand?.map((p) => [p.x, p.y, p.z]) ?? undefined,
-          rightHand: data.rightHand?.map((p) => [p.x, p.y, p.z]) ?? undefined,
-        };
-        return [...prev.slice(-29), frame]; // keep last 30 frames
-      });
-    }, 100);
-  }, []);
+  const rafRef = useRef<number | null>(null);
+  const videoRefRef = useRef<React.RefObject<HTMLVideoElement | null> | null>(null);
+  const landmarkerRef = useRef<Awaited<ReturnType<typeof getHandLandmarker>> | null>(null);
 
   const stopTracking = useCallback(() => {
     setIsTracking(false);
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
     }
     setLandmarks(null);
   }, []);
+
+  const startTracking = useCallback(
+    (videoRef: React.RefObject<HTMLVideoElement | null>) => {
+      videoRefRef.current = videoRef;
+      setIsTracking(true);
+      setFrames([]);
+
+      (async () => {
+        try {
+          landmarkerRef.current = await getHandLandmarker();
+        } catch {
+          console.error("Failed to load hand landmarker model");
+          return;
+        }
+
+        const capture = () => {
+          if (!videoRefRef.current?.current || !landmarkerRef.current) {
+            rafRef.current = requestAnimationFrame(capture);
+            return;
+          }
+
+          const video = videoRefRef.current.current;
+          if (video.readyState < 2) {
+            rafRef.current = requestAnimationFrame(capture);
+            return;
+          }
+
+          const detection = detectHands(landmarkerRef.current, video, performance.now());
+          const handFrame = resultToHandFrame(detection);
+
+          const hasLeft = handFrame.left_hand.some((pt) => pt.x !== 0 || pt.y !== 0 || pt.z !== 0);
+          const hasRight = handFrame.right_hand.some((pt) => pt.x !== 0 || pt.y !== 0 || pt.z !== 0);
+
+          setLandmarks({
+            leftHand: hasLeft ? handFrame.left_hand : null,
+            rightHand: hasRight ? handFrame.right_hand : null,
+            timestamp: Date.now(),
+          });
+
+          setFrames((prev) => [...prev.slice(-(SEQUENCE_LENGTH - 1)), handFrame]);
+
+          rafRef.current = requestAnimationFrame(capture);
+        };
+
+        rafRef.current = requestAnimationFrame(capture);
+      })();
+    },
+    []
+  );
 
   const clearFrames = useCallback(() => setFrames([]), []);
 
   useEffect(() => {
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, []);
 
-  const handCount = (landmarks?.leftHand ? 1 : 0) + (landmarks?.rightHand ? 1 : 0);
+  const handCount =
+    (landmarks?.leftHand ? 1 : 0) + (landmarks?.rightHand ? 1 : 0);
 
-  return { landmarks, isTracking, handCount, frames, startTracking, stopTracking, clearFrames };
+  return {
+    landmarks,
+    isTracking,
+    handCount,
+    frames,
+    startTracking,
+    stopTracking,
+    clearFrames,
+  };
 }
