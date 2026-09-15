@@ -109,29 +109,9 @@ export default function HomeFooter() {
           ))}
         </div>
 
-        {/* CTA row */}
-        <div className="mt-12 flex flex-col gap-3 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-start sm:gap-4">
-          <Link
-            to="/signup"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-2.5 text-[13px] font-semibold text-gray-900 transition-all duration-200 hover:bg-gray-100 focus-ring sm:inline-flex"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
-            Create account
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-          <Link
-            to="/dashboard"
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-6 py-2.5 text-[13px] font-medium text-white transition-all duration-200 hover:border-white/40 hover:bg-white/5 focus-ring sm:inline-flex"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
-            Open dashboard
-          </Link>
-        </div>
 
         {/* Bottom bar */}
-        <div className="mt-8 flex flex-col gap-4 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-14 flex flex-col gap-4 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-[12px] text-gray-500" style={{ fontFamily: "var(--font-heading)" }}>
             &copy; {new Date().getFullYear()} AegisHub. Built for GatewayHacks 2026 — Track 1: Accessibility &amp; Health.
           </p>

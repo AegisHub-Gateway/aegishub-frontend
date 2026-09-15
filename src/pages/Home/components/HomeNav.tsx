@@ -104,11 +104,33 @@ export default function HomeNav() {
             Sign in
           </Link>
 
-          {/* Get started CTA — pill with trailing circle */}
+          {/* Get started CTA — pill with trailing circle, teal accent on hover */}
           <Link
             to="/signup"
-            className="inline-flex items-center gap-2 rounded-full bg-gray-900 py-1.5 pl-4 pr-1.5 text-[13px] font-medium text-white transition-all duration-200 hover:bg-gray-800 focus-ring sm:text-[14px]"
-            style={{ fontFamily: "var(--font-heading)" }}
+            className="inline-flex items-center gap-2 rounded-full py-1.5 pl-4 pr-1.5 text-[13px] font-medium text-white focus-ring sm:text-[14px]"
+            style={{
+              fontFamily: "var(--font-heading)",
+              background: "#009C7A",
+              transition: "background-color 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s cubic-bezier(0.22,1,0.36,1), transform 0.15s cubic-bezier(0.22,1,0.36,1)",
+            }}
+            onMouseEnter={(e) => {
+              const el = e.currentTarget as HTMLElement;
+              el.style.backgroundColor = "#00B389";
+              el.style.boxShadow = "0 4px 16px rgba(0,156,122,0.35)";
+              el.style.transform = "translateY(-1px)";
+            }}
+            onMouseLeave={(e) => {
+              const el = e.currentTarget as HTMLElement;
+              el.style.backgroundColor = "#009C7A";
+              el.style.boxShadow = "none";
+              el.style.transform = "translateY(0)";
+            }}
+            onMouseDown={(e) => {
+              (e.currentTarget as HTMLElement).style.transform = "translateY(0) scale(0.975)";
+            }}
+            onMouseUp={(e) => {
+              (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
+            }}
           >
             <span className="hidden sm:inline">Get started</span>
             <span className="sm:hidden">Start</span>
@@ -159,8 +181,8 @@ export default function HomeNav() {
               </Link>
               <Link
                 to="/signup"
-                className="flex-1 rounded-xl bg-gray-900 py-2.5 text-center text-[13px] font-medium text-white transition-colors hover:bg-gray-800 focus-ring"
-                style={{ fontFamily: "var(--font-heading)" }}
+                className="flex-1 rounded-xl py-2.5 text-center text-[13px] font-medium text-white transition-all duration-200 hover:opacity-90 focus-ring"
+                style={{ fontFamily: "var(--font-heading)", background: "#009C7A" }}
                 onClick={() => setOpen(false)}
               >
                 Get started

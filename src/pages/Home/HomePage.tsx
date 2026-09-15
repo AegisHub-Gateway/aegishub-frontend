@@ -7,9 +7,6 @@ import HomeFooter from "./components/HomeFooter";
 import BlurFadeIn from "./components/BlurFadeIn";
 import Aurora from "./components/Aurora";
 import PulseRing from "./components/PulseRing";
-import CaptionerPreview from "./components/CaptionerPreview";
-import DermaScanPreview from "./components/DermaScanPreview";
-import SignLanguagePreview from "./components/SignLanguagePreview";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    AegisHub — Complete Homepage
@@ -149,18 +146,6 @@ function HeroContent() {
           </Link>
         </PulseRing>
       </div>
-
-      <div className="mt-5 flex items-center gap-5">
-        <Link to="/help" className="text-[13px] text-white/50 underline underline-offset-2 transition-colors hover:text-white/80 focus-ring rounded"
-          style={{ fontFamily: "var(--font-heading)" }}>
-          Safety information
-        </Link>
-        <span className="text-white/20" aria-hidden="true">&middot;</span>
-        <Link to="/dashboard" className="text-[13px] text-white/50 underline underline-offset-2 transition-colors hover:text-white/80 focus-ring rounded"
-          style={{ fontFamily: "var(--font-heading)" }}>
-          Open dashboard
-        </Link>
-      </div>
     </div>
   );
 }
@@ -263,14 +248,47 @@ function SectionIntro() {
    Card 1 is large/featured, cards 2+3 are standard.
 ────────────────────────────────────────────────────────────────────────── */
 
-const IcoHand = ({ s = 24 }: { s?: number }) => (
-  <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round"
-      d="M7 11.5V6.5a1.5 1.5 0 013 0v3M10 9.5V5a1.5 1.5 0 013 0v4.5M13 8.5V6a1.5 1.5 0 013 0v5.5m0 0v1a5 5 0 01-5 5H9a5 5 0 01-5-5v-2a1.5 1.5 0 013 0" />
-  </svg>
-);
 
 function SectionTools() {
+  /* Screenshot-based showcase — three equal cards, each containing
+     the real Playwright screenshot of that tool's interface.
+     Screenshots: 1440×900px, served from /public/images/screenshots/ */
+  const TOOLS = [
+    {
+      id: "sign",
+      label: "Camera",
+      title: "Sign Language Interpreter",
+      description: "Real-time hand landmark extraction and AI gloss classification. 21 landmarks per frame extracted in-browser — raw video never leaves your device.",
+      screenshot: "/images/screenshots/sign-language.png",
+      alt: "Sign Language Interpreter interface showing hand landmark overlay and classification result",
+      path: "/sign-interpreter",
+      cta: "Open interpreter",
+      delay: "0",
+    },
+    {
+      id: "caption",
+      label: "Microphone",
+      title: "Live Captioner",
+      description: "High-contrast real-time captions for deaf and hard-of-hearing patients. Built for masked clinicians, noisy wards, and critical conversations.",
+      screenshot: "/images/screenshots/captioner.png",
+      alt: "Live Captioner interface showing real-time transcript with speaker labels",
+      path: "/captioner",
+      cta: "Open captioner",
+      delay: "80",
+    },
+    {
+      id: "derma",
+      label: "Photo upload",
+      title: "Derma-Scan",
+      description: "Upload a photo of a skin concern. One compressed image is sent, analysed, then discarded server-side. Returns a plain-language triage observation.",
+      screenshot: "/images/screenshots/derma-scan.png",
+      alt: "Derma-Scan interface showing image upload and AI triage result",
+      path: "/derma-scan",
+      cta: "Open Derma-Scan",
+      delay: "160",
+    },
+  ] as const;
+
   return (
     <section
       id="features"
@@ -302,146 +320,102 @@ function SectionTools() {
           </h2>
         </div>
 
-        {/* Bento-style grid — large card left + two stacked right */}
-        <div className="grid gap-4 lg:grid-cols-3 lg:grid-rows-2">
-
-          {/* Large featured card — Sign Language */}
-          <article
-            className="scroll-reveal flex flex-col rounded-3xl p-8 lg:col-span-2 lg:row-span-2"
-            data-delay="0"
-            style={{
-              background: "#0D1014",
-              minHeight: 380,
-            }}
-          >
-            <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
-              {/* Left — text content */}
-              <div>
+        {/* Three equal showcase cards — real Playwright screenshots */}
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {TOOLS.map((tool) => (
+            <article
+              key={tool.id}
+              className="scroll-reveal group flex flex-col rounded-3xl overflow-hidden"
+              data-delay={tool.delay}
+              style={{
+                background: "#FFFFFF",
+                border: "1px solid #E3E5EC",
+                boxShadow: "0 2px 12px rgba(13,16,20,0.06), 0 0 1px rgba(13,16,20,0.04)",
+              }}
+            >
+              {/* Screenshot container — 16:10 aspect ratio matching the 1440×900 screenshots */}
+              <div
+                className="relative w-full overflow-hidden"
+                style={{
+                  aspectRatio: "16 / 10",
+                  background: "#0D1014",
+                  borderBottom: "1px solid #E3E5EC",
+                }}
+              >
+                <img
+                  src={tool.screenshot}
+                  alt={tool.alt}
+                  loading="lazy"
+                  decoding="async"
+                  className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]"
+                  style={{ willChange: "transform" }}
+                />
+                {/* Subtle vignette at bottom — blends screenshot into card */}
                 <div
-                  className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl"
-                  style={{ background: "rgba(0,156,122,0.25)", color: "var(--color-accent)" }}
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-16"
                   aria-hidden="true"
-                >
-                  <IcoHand s={22} />
-                </div>
-                <p className="mb-1 text-[11px] font-medium text-white/40 uppercase tracking-wide"
-                  style={{ fontFamily: "var(--font-heading)" }}>
-                  Requires camera
-                </p>
-                <h3
-                  className="mb-2 font-semibold text-white leading-snug"
-                  style={{ fontSize: "clamp(18px, 2.5vw, 24px)", fontFamily: "var(--font-heading)", letterSpacing: "-0.015em" }}
-                >
-                  Sign Language Interpreter
-                </h3>
-                <p className="mb-6 text-[13px] leading-relaxed text-white/50"
-                  style={{ fontFamily: "var(--font-heading)" }}>
-                  Real-time hand landmark extraction and AI gloss classification.
-                  Raw video never leaves your device.
-                </p>
-                <ul className="space-y-1.5 mb-6">
-                  {["21 landmarks per frame", "LSTM classification", "Confidence scores", "Works in noisy wards"].map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-[12px] text-white/40"
-                      style={{ fontFamily: "var(--font-heading)" }}>
-                      <span className="h-1 w-1 shrink-0 rounded-full bg-[#009C7A]" aria-hidden="true" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <PulseRing>
-                  <Link
-                    to="/sign-interpreter"
-                    className="inline-flex items-center gap-2 rounded-full bg-[#009C7A] py-2 pl-5 pr-2 text-[13px] font-medium text-white transition-all duration-200 hover:bg-[#00B389] focus-ring"
-                    style={{ fontFamily: "var(--font-heading)" }}
+                  style={{
+                    background: "linear-gradient(to top, rgba(255,255,255,0.12), transparent)",
+                  }}
+                />
+                {/* Input requirement badge — top-left */}
+                <div className="absolute left-3 top-3">
+                  <span
+                    className="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide backdrop-blur-md"
+                    style={{
+                      background: "rgba(13,16,20,0.65)",
+                      color: "rgba(255,255,255,0.85)",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      fontFamily: "var(--font-heading)",
+                    }}
                   >
-                    Open interpreter
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
-                      <IcoChevronRight s={12} />
-                    </span>
-                  </Link>
-                </PulseRing>
+                    {tool.label}
+                  </span>
+                </div>
               </div>
-              {/* Right — product preview */}
-              <div className="scroll-reveal" data-delay="100">
-                <SignLanguagePreview />
+
+              {/* Card body — product name, description, CTA */}
+              <div className="flex flex-1 flex-col p-6">
+                <h3
+                  className="mb-2 font-semibold leading-snug text-gray-900"
+                  style={{
+                    fontSize: "clamp(15px, 1.8vw, 17px)",
+                    fontFamily: "var(--font-heading)",
+                    letterSpacing: "-0.012em",
+                  }}
+                >
+                  {tool.title}
+                </h3>
+                <p
+                  className="mb-5 flex-1 text-[13px] leading-relaxed text-gray-500"
+                  style={{ fontFamily: "var(--font-heading)" }}
+                >
+                  {tool.description}
+                </p>
+                <Link
+                  to={tool.path}
+                  className="inline-flex items-center justify-between rounded-xl px-4 py-2.5 text-[13px] font-medium text-white transition-all duration-200 focus-ring"
+                  style={{
+                    background: "#009C7A",
+                    fontFamily: "var(--font-heading)",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = "#00B389";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(0,156,122,0.3)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = "#009C7A";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                  }}
+                >
+                  {tool.cta}
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20">
+                    <IcoChevronRight s={11} />
+                  </span>
+                </Link>
               </div>
-            </div>
-          </article>
-
-          {/* Card — Live Captioner */}
-          <article
-            className="scroll-reveal flex flex-col rounded-3xl overflow-hidden"
-            data-delay="60"
-            style={{ background: "#FFFFFF", border: "1px solid var(--color-border)" }}
-          >
-            {/* Product preview */}
-            <div className="px-5 pt-5">
-              <CaptionerPreview />
-            </div>
-            {/* Text content */}
-            <div className="p-5 pt-4">
-              <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-gray-400"
-                style={{ fontFamily: "var(--font-heading)" }}>
-                Requires microphone
-              </p>
-              <h3
-                className="mb-1.5 font-semibold leading-snug text-gray-900"
-                style={{ fontSize: "clamp(15px, 2vw, 18px)", fontFamily: "var(--font-heading)", letterSpacing: "-0.01em" }}
-              >
-                Live Captioner
-              </h3>
-              <p className="text-[12px] leading-relaxed text-gray-500 mb-4"
-                style={{ fontFamily: "var(--font-heading)" }}>
-                Real-time high-contrast captions for deaf and hard-of-hearing patients.
-                Built for masked clinicians, noisy wards, and critical conversations.
-              </p>
-              <Link
-                to="/captioner"
-                className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#009C7A] transition-colors hover:text-[#00846A] focus-ring rounded"
-                style={{ fontFamily: "var(--font-heading)" }}
-              >
-                Open captioner <IcoChevronRight s={12} />
-              </Link>
-            </div>
-          </article>
-
-          {/* Card — Derma-Scan */}
-          <article
-            className="scroll-reveal flex flex-col rounded-3xl overflow-hidden"
-            data-delay="120"
-            style={{ background: "#FFFFFF", border: "1px solid var(--color-border)" }}
-          >
-            {/* Product preview */}
-            <div className="px-5 pt-5">
-              <DermaScanPreview />
-            </div>
-            {/* Text content */}
-            <div className="p-5 pt-4">
-              <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-gray-400"
-                style={{ fontFamily: "var(--font-heading)" }}>
-                Requires photo upload
-              </p>
-              <h3
-                className="mb-1.5 font-semibold leading-snug text-gray-900"
-                style={{ fontSize: "clamp(15px, 2vw, 18px)", fontFamily: "var(--font-heading)", letterSpacing: "-0.01em" }}
-              >
-                Derma-Scan
-              </h3>
-              <p className="text-[12px] leading-relaxed text-gray-500 mb-4"
-                style={{ fontFamily: "var(--font-heading)" }}>
-                Upload a photo of a skin concern. One compressed image is sent,
-                analysed, then discarded. Returns a plain-language triage observation,
-                never a diagnosis.
-              </p>
-              <Link
-                to="/derma-scan"
-                className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#009C7A] transition-colors hover:text-[#00846A] focus-ring rounded"
-                style={{ fontFamily: "var(--font-heading)" }}
-              >
-                Open Derma-Scan <IcoChevronRight s={12} />
-              </Link>
-            </div>
-          </article>
+            </article>
+          ))}
         </div>
       </div>
     </section>
