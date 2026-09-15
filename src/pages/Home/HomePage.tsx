@@ -195,7 +195,7 @@ function SectionIntro() {
             >
               Three tools.<br />
               One{" "}
-              <span style={{ fontFamily: "var(--font-heading)", fontStyle: "italic", fontWeight: 400 }}>
+              <span style={{ fontFamily: "var(--font-body)", fontStyle: "italic", fontWeight: 400 }}>
                 gateway.
               </span>
               <br />
@@ -304,7 +304,7 @@ function SectionTools() {
             }}
           >
             Every tool built for a{" "}
-            <span style={{ fontFamily: "var(--font-heading)", fontStyle: "italic", fontWeight: 400 }}>
+            <span style={{ fontFamily: "var(--font-body)", fontStyle: "italic", fontWeight: 400 }}>
               real clinical need.
             </span>
           </h2>
@@ -601,7 +601,7 @@ function SectionPrivacy() {
               }}
             >
               Your raw data<br />
-              <span style={{ fontFamily: "var(--font-heading)", fontStyle: "italic", fontWeight: 400 }}>
+              <span style={{ fontFamily: "var(--font-body)", fontStyle: "italic", fontWeight: 400 }}>
                 never leaves
               </span>
               <br />
@@ -812,7 +812,7 @@ function SectionFinalCTA() {
             >
               Healthcare communication<br />
               that{" "}
-              <span style={{ fontFamily: "var(--font-heading)", fontStyle: "italic", fontWeight: 400 }}>
+              <span style={{ fontFamily: "var(--font-body)", fontStyle: "italic", fontWeight: 400 }}>
                 actually works.
               </span>
             </h2>
