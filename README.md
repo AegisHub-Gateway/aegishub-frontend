@@ -14,6 +14,20 @@ AegisHub is a client-side React application that connects to backend AI services
 
 All three tools run in **mock mode** by default, returning simulated data so the UI can be developed and demonstrated without a live backend. Toggle to real API calls by setting `USE_MOCK_API = false` in `src/lib/types/api.ts` and providing `VITE_API_BASE_URL`.
 
+## Product Screenshots
+
+Each tool has a dedicated page with real-time UI. Screenshots can be captured from the running app.
+
+| Tool | Preview | Description |
+|------|---------|-------------|
+| **Sign Language Interpreter** | `public/images/screenshots/sign-language.png` | Hand landmark visualization, gloss result with confidence bars, alternative interpretations |
+| **Live Captioner** | `public/images/screenshots/captioner.png` | Live transcript with speaker labels, status indicators, font size and contrast controls |
+| **Derma-Scan** | `public/images/screenshots/derma-scan.png` | Image upload zone, triage tier indicator, plain-language observation, confidence badge |
+
+> **To capture screenshots:** Run `npm run dev`, navigate to each tool page, and take a screenshot. Save to `public/images/screenshots/`.
+
+The homepage also embeds product preview components (`CaptionerPreview`, `DermaScanPreview`, `SignLanguagePreview`) that render realistic mock UIs of each tool directly on the landing page feature cards.
+
 ## Tech Stack
 
 - **React 18** with TypeScript
@@ -89,6 +103,10 @@ src/
 
   pages/
     Home/                     # Marketing homepage (hero, tools, data flow, FAQ, footer)
+      components/
+        CaptionerPreview.tsx   # Product preview mock for homepage feature card
+        DermaScanPreview.tsx   # Product preview mock for homepage feature card
+        SignLanguagePreview.tsx# Product preview mock for homepage feature card
     Dashboard/                # Authenticated dashboard with tool cards + recent activity
     SignInterpreter/          # Camera + hand landmarks + classify workflow
     Captioner/                # Microphone + live caption streaming
