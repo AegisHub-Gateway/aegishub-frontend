@@ -315,3 +315,36 @@ body {
   transform-origin: left;
   animation: barGrow 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SCROLL REVEAL — Apple-style blur → sharp entrance
+   Elements start invisible, blurred, and slightly translated down.
+   When .scroll-revealed is added (by IntersectionObserver), they
+   smoothly transition to their final state.
+───────────────────────────────────────────────────────────────────────────── */
+.scroll-reveal {
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(24px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, filter, transform;
+}
+
+.scroll-revealed {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+}
+
+/* ── Reduced motion override ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    transition: none;
+  }
+}
