@@ -7,6 +7,9 @@ import HomeFooter from "./components/HomeFooter";
 import BlurFadeIn from "./components/BlurFadeIn";
 import Aurora from "./components/Aurora";
 import PulseRing from "./components/PulseRing";
+import CaptionerPreview from "./components/CaptionerPreview";
+import DermaScanPreview from "./components/DermaScanPreview";
+import SignLanguagePreview from "./components/SignLanguagePreview";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    AegisHub — Complete Homepage
@@ -67,12 +70,6 @@ const IcoChevronRight = ({ s = 14 }: { s?: number }) => (
   <svg width={s} height={s} fill="none" viewBox="0 0 24 24"
     stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-  </svg>
-);
-const IcoCheck = ({ s = 14 }: { s?: number }) => (
-  <svg width={s} height={s} fill="none" viewBox="0 0 24 24"
-    stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
   </svg>
 );
 const IcoShield = ({ s = 20 }: { s?: number }) => (
@@ -220,23 +217,23 @@ function SectionIntro() {
               users, and clinicians communicating across barriers. Every tool
               processes data locally in your browser first.
             </p>
-            <ul className="space-y-3 mb-10">
+            <ul className="space-y-4 mb-10">
               {[
-                "Hand landmarks extracted in-browser — no video transmitted",
-                "Audio frames processed per-utterance, not stored",
-                "Skin images discarded server-side after analysis",
-                "Confidence scores shown with every AI result",
+                { icon: "01", text: "Hand landmarks extracted in-browser — no video transmitted" },
+                { icon: "02", text: "Audio frames processed per-utterance, not stored" },
+                { icon: "03", text: "Skin images discarded server-side after analysis" },
+                { icon: "04", text: "Confidence scores shown with every AI result" },
               ].map((point) => (
-                <li key={point} className="flex items-start gap-3">
+                <li key={point.text} className="flex items-start gap-4">
                   <span
-                    className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
-                    style={{ background: "var(--color-accent-light)", color: "var(--color-accent)" }}
+                    className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold"
+                    style={{ background: "#0D1014", color: "#fff", fontFamily: "var(--font-mono)" }}
                     aria-hidden="true"
                   >
-                    <IcoCheck s={11} />
+                    {point.icon}
                   </span>
-                  <span className="text-[14px] leading-snug text-gray-600" style={{ fontFamily: "var(--font-heading)" }}>
-                    {point}
+                  <span className="text-[14px] leading-snug text-gray-600 pt-0.5" style={{ fontFamily: "var(--font-heading)" }}>
+                    {point.text}
                   </span>
                 </li>
               ))}
@@ -270,19 +267,6 @@ const IcoHand = ({ s = 24 }: { s?: number }) => (
   <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6} aria-hidden="true">
     <path strokeLinecap="round" strokeLinejoin="round"
       d="M7 11.5V6.5a1.5 1.5 0 013 0v3M10 9.5V5a1.5 1.5 0 013 0v4.5M13 8.5V6a1.5 1.5 0 013 0v5.5m0 0v1a5 5 0 01-5 5H9a5 5 0 01-5-5v-2a1.5 1.5 0 013 0" />
-  </svg>
-);
-const IcoMic = ({ s = 24 }: { s?: number }) => (
-  <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 2a3 3 0 00-3 3v6a3 3 0 006 0V5a3 3 0 00-3-3z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19 10a7 7 0 01-14 0M12 17v4M8 21h8" />
-  </svg>
-);
-const IcoScan = ({ s = 24 }: { s?: number }) => (
-  <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round"
-      d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M7 12h10M12 7v10" />
   </svg>
 );
 
@@ -330,129 +314,133 @@ function SectionTools() {
               minHeight: 380,
             }}
           >
-            <div
-              className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl"
-              style={{ background: "rgba(0,156,122,0.25)", color: "var(--color-accent)" }}
-              aria-hidden="true"
-            >
-              <IcoHand s={24} />
-            </div>
-            <p className="mb-1 text-[12px] font-medium text-white/40 uppercase tracking-wide"
-              style={{ fontFamily: "var(--font-heading)" }}>
-              Requires camera
-            </p>
-            <h3
-              className="mb-3 font-semibold text-white leading-snug"
-              style={{ fontSize: "clamp(20px, 2.5vw, 28px)", fontFamily: "var(--font-heading)", letterSpacing: "-0.015em" }}
-            >
-              Sign Language Interpreter
-            </h3>
-            <p className="mb-8 text-[14px] leading-relaxed text-white/60 max-w-md"
-              style={{ fontFamily: "var(--font-heading)" }}>
-              Your camera captures hand movement. MediaPipe extracts 21 landmark
-              coordinates per frame — entirely in-browser. Only those lightweight
-              coordinates reach the LSTM model. Raw video never leaves your device.
-            </p>
-            <ul className="space-y-2 mb-auto">
-              {["Real-time hand landmark extraction", "AI gloss classification with confidence", "Alternative interpretations shown", "Works in noisy clinical environments"].map((f) => (
-                <li key={f} className="flex items-center gap-2.5 text-[13px] text-white/60"
-                  style={{ fontFamily: "var(--font-heading)" }}>
-                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/10" aria-hidden="true">
-                    <IcoCheck s={9} />
-                  </span>
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <div className="mt-8">
-              <PulseRing>
-                <Link
-                  to="/sign-interpreter"
-                  className="inline-flex items-center gap-2.5 rounded-full bg-[#009C7A] py-2 pl-5 pr-2 text-[13px] font-medium text-white transition-all duration-200 hover:bg-[#00B389] focus-ring"
-                  style={{ fontFamily: "var(--font-heading)" }}
+            <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+              {/* Left — text content */}
+              <div>
+                <div
+                  className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl"
+                  style={{ background: "rgba(0,156,122,0.25)", color: "var(--color-accent)" }}
+                  aria-hidden="true"
                 >
-                  Open interpreter
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
-                    <IcoChevronRight s={12} />
-                  </span>
-                </Link>
-              </PulseRing>
+                  <IcoHand s={22} />
+                </div>
+                <p className="mb-1 text-[11px] font-medium text-white/40 uppercase tracking-wide"
+                  style={{ fontFamily: "var(--font-heading)" }}>
+                  Requires camera
+                </p>
+                <h3
+                  className="mb-2 font-semibold text-white leading-snug"
+                  style={{ fontSize: "clamp(18px, 2.5vw, 24px)", fontFamily: "var(--font-heading)", letterSpacing: "-0.015em" }}
+                >
+                  Sign Language Interpreter
+                </h3>
+                <p className="mb-6 text-[13px] leading-relaxed text-white/50"
+                  style={{ fontFamily: "var(--font-heading)" }}>
+                  Real-time hand landmark extraction and AI gloss classification.
+                  Raw video never leaves your device.
+                </p>
+                <ul className="space-y-1.5 mb-6">
+                  {["21 landmarks per frame", "LSTM classification", "Confidence scores", "Works in noisy wards"].map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-[12px] text-white/40"
+                      style={{ fontFamily: "var(--font-heading)" }}>
+                      <span className="h-1 w-1 shrink-0 rounded-full bg-[#009C7A]" aria-hidden="true" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <PulseRing>
+                  <Link
+                    to="/sign-interpreter"
+                    className="inline-flex items-center gap-2 rounded-full bg-[#009C7A] py-2 pl-5 pr-2 text-[13px] font-medium text-white transition-all duration-200 hover:bg-[#00B389] focus-ring"
+                    style={{ fontFamily: "var(--font-heading)" }}
+                  >
+                    Open interpreter
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
+                      <IcoChevronRight s={12} />
+                    </span>
+                  </Link>
+                </PulseRing>
+              </div>
+              {/* Right — product preview */}
+              <div className="scroll-reveal" data-delay="100">
+                <SignLanguagePreview />
+              </div>
             </div>
           </article>
 
           {/* Card — Live Captioner */}
           <article
-            className="scroll-reveal flex flex-col rounded-3xl p-7"
+            className="scroll-reveal flex flex-col rounded-3xl overflow-hidden"
             data-delay="60"
             style={{ background: "#FFFFFF", border: "1px solid var(--color-border)" }}
           >
-            <div
-              className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl"
-              style={{ background: "var(--color-accent-light)", color: "var(--color-accent)" }}
-              aria-hidden="true"
-            >
-              <IcoMic s={22} />
+            {/* Product preview */}
+            <div className="px-5 pt-5">
+              <CaptionerPreview />
             </div>
-            <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-gray-500"
-              style={{ fontFamily: "var(--font-heading)" }}>
-              Requires microphone
-            </p>
-            <h3
-              className="mb-2 font-semibold leading-snug text-gray-900"
-              style={{ fontSize: "clamp(16px, 2vw, 20px)", fontFamily: "var(--font-heading)", letterSpacing: "-0.01em" }}
-            >
-              Live Captioner
-            </h3>
-            <p className="mb-auto text-[13px] leading-relaxed text-gray-600"
-              style={{ fontFamily: "var(--font-heading)" }}>
-              Real-time high-contrast captions for deaf and hard-of-hearing patients.
-              Built for masked clinicians, noisy wards, and critical conversations.
-            </p>
-            <Link
-              to="/captioner"
-              className="mt-6 inline-flex items-center gap-1.5 text-[13px] font-medium text-[#009C7A] transition-colors hover:text-[#00846A] focus-ring rounded"
-              style={{ fontFamily: "var(--font-heading)" }}
-            >
-              Open captioner <IcoChevronRight s={12} />
-            </Link>
+            {/* Text content */}
+            <div className="p-5 pt-4">
+              <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-gray-400"
+                style={{ fontFamily: "var(--font-heading)" }}>
+                Requires microphone
+              </p>
+              <h3
+                className="mb-1.5 font-semibold leading-snug text-gray-900"
+                style={{ fontSize: "clamp(15px, 2vw, 18px)", fontFamily: "var(--font-heading)", letterSpacing: "-0.01em" }}
+              >
+                Live Captioner
+              </h3>
+              <p className="text-[12px] leading-relaxed text-gray-500 mb-4"
+                style={{ fontFamily: "var(--font-heading)" }}>
+                Real-time high-contrast captions for deaf and hard-of-hearing patients.
+                Built for masked clinicians, noisy wards, and critical conversations.
+              </p>
+              <Link
+                to="/captioner"
+                className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#009C7A] transition-colors hover:text-[#00846A] focus-ring rounded"
+                style={{ fontFamily: "var(--font-heading)" }}
+              >
+                Open captioner <IcoChevronRight s={12} />
+              </Link>
+            </div>
           </article>
 
           {/* Card — Derma-Scan */}
           <article
-            className="scroll-reveal flex flex-col rounded-3xl p-7"
+            className="scroll-reveal flex flex-col rounded-3xl overflow-hidden"
             data-delay="120"
             style={{ background: "#FFFFFF", border: "1px solid var(--color-border)" }}
           >
-            <div
-              className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl"
-              style={{ background: "var(--color-accent-light)", color: "var(--color-accent)" }}
-              aria-hidden="true"
-            >
-              <IcoScan s={22} />
+            {/* Product preview */}
+            <div className="px-5 pt-5">
+              <DermaScanPreview />
             </div>
-            <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-gray-500"
-              style={{ fontFamily: "var(--font-heading)" }}>
-              Requires photo upload
-            </p>
-            <h3
-              className="mb-2 font-semibold leading-snug text-gray-900"
-              style={{ fontSize: "clamp(16px, 2vw, 20px)", fontFamily: "var(--font-heading)", letterSpacing: "-0.01em" }}
-            >
-              Derma-Scan
-            </h3>
-            <p className="mb-auto text-[13px] leading-relaxed text-gray-600"
-              style={{ fontFamily: "var(--font-heading)" }}>
-              Upload a photo of a skin concern. One compressed image is sent,
-              analysed, then discarded. Returns a plain-language triage observation,
-              never a diagnosis.
-            </p>
-            <Link
-              to="/derma-scan"
-              className="mt-6 inline-flex items-center gap-1.5 text-[13px] font-medium text-[#009C7A] transition-colors hover:text-[#00846A] focus-ring rounded"
-              style={{ fontFamily: "var(--font-heading)" }}
-            >
-              Open Derma-Scan <IcoChevronRight s={12} />
-            </Link>
+            {/* Text content */}
+            <div className="p-5 pt-4">
+              <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-gray-400"
+                style={{ fontFamily: "var(--font-heading)" }}>
+                Requires photo upload
+              </p>
+              <h3
+                className="mb-1.5 font-semibold leading-snug text-gray-900"
+                style={{ fontSize: "clamp(15px, 2vw, 18px)", fontFamily: "var(--font-heading)", letterSpacing: "-0.01em" }}
+              >
+                Derma-Scan
+              </h3>
+              <p className="text-[12px] leading-relaxed text-gray-500 mb-4"
+                style={{ fontFamily: "var(--font-heading)" }}>
+                Upload a photo of a skin concern. One compressed image is sent,
+                analysed, then discarded. Returns a plain-language triage observation,
+                never a diagnosis.
+              </p>
+              <Link
+                to="/derma-scan"
+                className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#009C7A] transition-colors hover:text-[#00846A] focus-ring rounded"
+                style={{ fontFamily: "var(--font-heading)" }}
+              >
+                Open Derma-Scan <IcoChevronRight s={12} />
+              </Link>
+            </div>
           </article>
         </div>
       </div>
