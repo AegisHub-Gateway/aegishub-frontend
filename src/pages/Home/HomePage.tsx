@@ -1,29 +1,267 @@
-import { useState } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
-import { useTheme } from "../../context/ThemeContext";
-import { useScrollReveal } from "../../lib/hooks/useScrollReveal";
+import HomeNav from "./components/HomeNav";
+import ProductPreview from "./components/ProductPreview";
+import HomeFooter from "./components/HomeFooter";
+import BlurFadeIn from "./components/BlurFadeIn";
+import Aurora from "./components/Aurora";
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   AegisHub Homepage — Rebuilt
-   Design decisions:
-   • Hero is the three-tool selection: the structural argument of the product
-     presented first, not buried. Each panel states tool, input required, and
-     who it's for before the visitor clicks anything.
-   • One orchestrated motion moment: hero panels stagger in on first load.
-     Scroll reveals used only where sequence matters (how-it-works steps).
-   • No ALL-CAPS eyebrow labels. No decorative arrows on every CTA.
-   • Numbers 01/02/03/04 used in how-it-works because that content IS a
-     sequence — not as decoration.
-   • Stats removed (were fabricated numbers that undermine trust).
-   • Testimonial removed (fabricated quote undermines the trust it claims to build).
-   • Medical disclaimer gets its own visible section, not just a footer note.
+   AegisHub — Complete Homepage
+   Structure:
+     Hero (full-viewport rounded canvas)
+       └─ HomeNav · HeroContent · ProductPreview (bleeds off bottom)
+     Section 01 — Product Introduction
+     Section 02 — Three Tools (capabilities)
+     Section 03 — How It Works (4-step sequence)
+     Section 04 — Split-Processing / Privacy
+     Section 05 — Medical Safety (required)
+     Section 06 — Final CTA
+     HomeFooter
 ───────────────────────────────────────────────────────────────────────────── */
 
-/* ── SVG icons ───────────────────────────────────────────────────────────── */
+/* ──────────────────────────────────────────────────────────────────────────
+   SCROLL REVEAL HOOK
+   Apple-style blur + fade + translateY entrance.
+   Uses IntersectionObserver for performance.
+───────────────────────────────────────────────────────────────────────────── */
+function useScrollReveal() {
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  const setupObserver = useCallback(() => {
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const el = entry.target as HTMLElement;
+            const delay = el.dataset.delay || "0";
+            el.style.transitionDelay = `${delay}ms`;
+            el.classList.add("scroll-revealed");
+            observerRef.current?.unobserve(el);
+          }
+        });
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -30px 0px" }
+    );
+
+    document.querySelectorAll(".scroll-reveal").forEach((el) => {
+      observerRef.current?.observe(el);
+    });
+  }, []);
+
+  useEffect(() => {
+    const t = setTimeout(setupObserver, 80);
+    return () => {
+      clearTimeout(t);
+      observerRef.current?.disconnect();
+    };
+  }, [setupObserver]);
+}
+
+/* ── Shared primitives ───────────────────────────────────────────────────── */
+const IcoChevronRight = ({ s = 14 }: { s?: number }) => (
+  <svg width={s} height={s} fill="none" viewBox="0 0 24 24"
+    stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+  </svg>
+);
+const IcoCheck = ({ s = 14 }: { s?: number }) => (
+  <svg width={s} height={s} fill="none" viewBox="0 0 24 24"
+    stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+  </svg>
+);
+const IcoShield = ({ s = 20 }: { s?: number }) => (
+  <svg width={s} height={s} fill="none" viewBox="0 0 24 24"
+    stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round"
+      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+  </svg>
+);
+
+/* ──────────────────────────────────────────────────────────────────────────
+   HERO
+───────────────────────────────────────────────────────────────────────────── */
+function HeroContent() {
+  return (
+    <div className="flex flex-col items-center px-4 pb-10 pt-10 text-center sm:pb-14 sm:pt-16">
+      <span className="inline-flex items-center gap-2 rounded-full bg-white/[0.08] border border-white/[0.12] px-4 py-1.5 text-[13px] text-white/80 backdrop-blur-sm">
+        <span className="h-2 w-2 rounded-full" style={{ background: "var(--color-accent)" }} aria-hidden="true" />
+        <span style={{ fontFamily: "var(--font-heading)", fontWeight: 500 }}>
+          AegisHub &middot; Health Accessibility Gateway
+        </span>
+      </span>
+
+      <h1
+        className="mt-5 max-w-4xl text-white sm:mt-6"
+        style={{
+          fontSize: "clamp(34px, 7.5vw, 70px)",
+          lineHeight: 1.05,
+          fontWeight: 600,
+          letterSpacing: "-0.025em",
+          fontFamily: "var(--font-heading)",
+        }}
+      >
+        <BlurFadeIn
+          text="Making healthcare "
+          delay={0.3}
+          stagger={0.08}
+          loop
+        />
+        <span style={{ fontStyle: "italic", fontWeight: 400, letterSpacing: "-0.01em" }}>
+          <BlurFadeIn
+            text="accessible"
+            delay={0.6}
+            stagger={0.1}
+            loop
+          />
+        </span>
+        <br />
+        <BlurFadeIn
+          text="for everyone."
+          delay={0.9}
+          stagger={0.08}
+          loop
+        />
+      </h1>
+
+      <p
+        className="mt-4 max-w-xl px-2 text-white/60 sm:mt-5"
+        style={{ fontSize: "clamp(14px, 3.2vw, 17px)", fontFamily: "var(--font-heading)", lineHeight: 1.65, fontWeight: 300 }}
+      >
+        Sign language interpretation, live clinical captions, and AI-assisted
+        skin analysis — in one platform, with your data staying in your browser.
+      </p>
+
+      <Link
+        to="/signup"
+        className="mt-7 inline-flex items-center gap-3 rounded-full bg-[#009C7A] py-2.5 pl-7 pr-2 text-[14px] font-semibold text-white transition-all duration-200 hover:bg-[#00B389] hover:shadow-lg hover:shadow-[#009C7A]/25 focus-ring sm:mt-8 sm:py-3 sm:pl-8"
+        style={{ fontFamily: "var(--font-heading)" }}
+      >
+        Get started free
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 sm:h-8 sm:w-8">
+          <IcoChevronRight />
+        </span>
+      </Link>
+
+      <div className="mt-5 flex items-center gap-5">
+        <Link to="/help" className="text-[13px] text-white/50 underline underline-offset-2 transition-colors hover:text-white/80 focus-ring rounded"
+          style={{ fontFamily: "var(--font-heading)" }}>
+          Safety information
+        </Link>
+        <span className="text-white/20" aria-hidden="true">&middot;</span>
+        <Link to="/dashboard" className="text-[13px] text-white/50 underline underline-offset-2 transition-colors hover:text-white/80 focus-ring rounded"
+          style={{ fontFamily: "var(--font-heading)" }}>
+          Open dashboard
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 01 — Product Introduction
+   Full-width editorial intro: left headline, right supporting copy + CTA.
+   Mirrors the Convix "We Champion the Bold" section quality.
+────────────────────────────────────────────────────────────────────────── */
+function SectionIntro() {
+  return (
+    <section
+      id="product"
+      className="py-24 px-5 sm:px-8"
+      style={{ background: "#FFFFFF" }}
+    >
+      <div className="mx-auto max-w-[1100px]">
+        <div className="grid gap-12 lg:grid-cols-2 lg:gap-20 lg:items-center">
+          {/* Left — headline */}
+          <div className="scroll-reveal" data-delay="0">
+            <p
+              className="mb-5 text-[12px] font-semibold uppercase tracking-wider"
+              style={{ color: "var(--color-accent)", fontFamily: "var(--font-heading)" }}
+            >
+              What is AegisHub
+            </p>
+            <h2
+              className="font-bold leading-tight text-gray-900"
+              style={{
+                fontSize: "clamp(28px, 4vw, 48px)",
+                letterSpacing: "-0.025em",
+                fontFamily: "var(--font-heading)",
+                lineHeight: 1.1,
+              }}
+            >
+              Three tools.<br />
+              One{" "}
+              <span style={{ fontFamily: "var(--font-heading)", fontStyle: "italic", fontWeight: 400 }}>
+                gateway.
+              </span>
+              <br />
+              Zero raw data sent.
+            </h2>
+          </div>
+
+          {/* Right — copy + points */}
+          <div className="scroll-reveal" data-delay="80">
+            <p
+              className="mb-8 text-[15px] leading-relaxed text-gray-600"
+              style={{ fontFamily: "var(--font-heading)", fontWeight: 400 }}
+            >
+              AegisHub is a healthcare accessibility platform built for the people
+              who need it most — deaf and hard-of-hearing patients, sign language
+              users, and clinicians communicating across barriers. Every tool
+              processes data locally in your browser first.
+            </p>
+            <ul className="space-y-3 mb-10">
+              {[
+                "Hand landmarks extracted in-browser — no video transmitted",
+                "Audio frames processed per-utterance, not stored",
+                "Skin images discarded server-side after analysis",
+                "Confidence scores shown with every AI result",
+              ].map((point) => (
+                <li key={point} className="flex items-start gap-3">
+                  <span
+                    className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+                    style={{ background: "var(--color-accent-light)", color: "var(--color-accent)" }}
+                    aria-hidden="true"
+                  >
+                    <IcoCheck s={11} />
+                  </span>
+                  <span className="text-[14px] leading-snug text-gray-600" style={{ fontFamily: "var(--font-heading)" }}>
+                    {point}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <Link
+              to="/signup"
+              className="inline-flex items-center gap-2.5 rounded-full bg-gray-900 py-2.5 pl-6 pr-2 text-[14px] font-medium text-white transition-all duration-200 hover:bg-gray-800 focus-ring"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              Try AegisHub free
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/15">
+                <IcoChevronRight />
+              </span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 02 — Three Tools (capabilities)
+   Three cards with different visual weights — NOT identical boring SaaS cards.
+   Card 1 is large/featured, cards 2+3 are standard.
+────────────────────────────────────────────────────────────────────────── */
+
 const IcoHand = ({ s = 24 }: { s?: number }) => (
   <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M7 11.5V6.5a1.5 1.5 0 013 0v3M10 9.5V5a1.5 1.5 0 013 0v4.5M13 8.5V6a1.5 1.5 0 013 0v5.5m0 0v1a5 5 0 01-5 5H9a5 5 0 01-5-5v-2a1.5 1.5 0 013 0" />
+    <path strokeLinecap="round" strokeLinejoin="round"
+      d="M7 11.5V6.5a1.5 1.5 0 013 0v3M10 9.5V5a1.5 1.5 0 013 0v4.5M13 8.5V6a1.5 1.5 0 013 0v5.5m0 0v1a5 5 0 01-5 5H9a5 5 0 01-5-5v-2a1.5 1.5 0 013 0" />
   </svg>
 );
 const IcoMic = ({ s = 24 }: { s?: number }) => (
@@ -34,656 +272,275 @@ const IcoMic = ({ s = 24 }: { s?: number }) => (
 );
 const IcoScan = ({ s = 24 }: { s?: number }) => (
   <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2" />
+    <path strokeLinecap="round" strokeLinejoin="round"
+      d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2" />
     <path strokeLinecap="round" strokeLinejoin="round" d="M7 12h10M12 7v10" />
   </svg>
 );
-const IcoShield = ({ s = 18 }: { s?: number }) => (
-  <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-  </svg>
-);
-const IcoCamera = ({ s = 14 }: { s?: number }) => (
-  <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-  </svg>
-);
-const IcoPhoto = ({ s = 14 }: { s?: number }) => (
-  <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-  </svg>
-);
-const IcoChevronDown = ({ s = 16 }: { s?: number }) => (
-  <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-  </svg>
-);
-const IcoArrowRight = ({ s = 14 }: { s?: number }) => (
-  <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-  </svg>
-);
-const IcoMoon = ({ s = 17 }: { s?: number }) => (
-  <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-  </svg>
-);
-const IcoSun = ({ s = 17 }: { s?: number }) => (
-  <svg width={s} height={s} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-  </svg>
-);
 
-/* ── Navbar ───────────────────────────────────────────────────────────────── */
-function Navbar({ theme, onToggle }: { theme: string; onToggle: () => void }) {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  /* Track scroll for background reveal */
-  useState(() => {
-    const fn = () => setScrolled(window.scrollY > 16);
-    window.addEventListener("scroll", fn, { passive: true });
-    return () => window.removeEventListener("scroll", fn);
-  });
-
-  const toolLinks = [
-    { label: "Sign Language", href: "/sign-interpreter" },
-    { label: "Captioner",     href: "/captioner" },
-    { label: "Derma-Scan",    href: "/derma-scan" },
-  ];
-
-  return (
-    <header
-      role="banner"
-      className="fixed inset-x-0 top-0 z-50 transition-all"
-      style={{
-        background: scrolled
-          ? "color-mix(in srgb, var(--color-surface) 90%, transparent)"
-          : "transparent",
-        backdropFilter: scrolled ? "blur(14px) saturate(1.4)" : "none",
-        borderBottom: scrolled
-          ? "1px solid var(--color-border)"
-          : "1px solid transparent",
-        transitionDuration: "300ms",
-        transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
-      }}
-    >
-      <div className="mx-auto flex h-16 max-w-site items-center justify-between px-6 lg:px-10">
-        {/* Wordmark */}
-        <Link
-          to="/"
-          className="flex items-center gap-2.5 focus-ring rounded"
-          aria-label="AegisHub — home"
-        >
-          <div
-            className="flex h-7 w-7 items-center justify-center rounded-lg"
-            style={{ background: "var(--color-accent)" }}
-            aria-hidden="true"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L3 8v5c0 5 4 9 9 11 5-2 9-6 9-11V8L12 2z" fill="white" fillOpacity="0.95" />
-              <path d="M9 12l2 2 4-4" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <span
-            className="text-[15px] font-semibold tracking-tight"
-            style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-heading)" }}
-          >
-            AegisHub
-          </span>
-        </Link>
-
-        {/* Desktop nav — tool links + disclaimer */}
-        <nav aria-label="Main navigation" className="hidden items-center gap-7 lg:flex">
-          {toolLinks.map((l) => (
-            <Link
-              key={l.href}
-              to={l.href}
-              className="nav-link text-sm font-medium focus-ring rounded"
-              style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-heading)" }}
-            >
-              {l.label}
-            </Link>
-          ))}
-          {/* Persistent disclaimer link — required for medical context */}
-          <a
-            href="#safety"
-            className="nav-link text-sm font-medium focus-ring rounded"
-            style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-heading)" }}
-          >
-            Safety info
-          </a>
-        </nav>
-
-        {/* Right: theme toggle + auth */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onToggle}
-            className="flex h-8 w-8 items-center justify-center rounded-lg focus-ring transition-colors"
-            style={{ color: "var(--color-text-muted)" }}
-            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-primary)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
-          >
-            {theme === "dark" ? <IcoSun /> : <IcoMoon />}
-          </button>
-
-          <Link
-            to="/signin"
-            className="hidden text-sm font-medium focus-ring rounded px-1 transition-colors lg:block"
-            style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-heading)" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-primary)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-secondary)"; }}
-          >
-            Sign in
-          </Link>
-          <Link
-            to="/signup"
-            className="hidden rounded-lg px-4 py-2 text-sm font-semibold focus-ring transition-colors lg:block"
-            style={{ background: "var(--color-accent)", color: "#fff", fontFamily: "var(--font-heading)" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-accent-hover)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-accent)"; }}
-          >
-            Get started
-          </Link>
-
-          {/* Mobile toggle */}
-          <button
-            onClick={() => setMobileOpen((v) => !v)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg focus-ring lg:hidden"
-            style={{ color: "var(--color-text-secondary)" }}
-            aria-label={mobileOpen ? "Close menu" : "Open menu"}
-            aria-expanded={mobileOpen}
-          >
-            {mobileOpen ? (
-              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-            ) : (
-              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h10" /></svg>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile drawer */}
-      <div
-        className="overflow-hidden transition-all lg:hidden"
-        style={{
-          maxHeight: mobileOpen ? "420px" : "0",
-          background: "var(--color-surface)",
-          borderTop: mobileOpen ? "1px solid var(--color-border)" : "none",
-          transitionDuration: "280ms",
-          transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
-        }}
-        aria-hidden={!mobileOpen}
-      >
-        <nav aria-label="Mobile navigation" className="px-6 py-5 space-y-1">
-          {toolLinks.map((l) => (
-            <Link
-              key={l.href}
-              to={l.href}
-              onClick={() => setMobileOpen(false)}
-              className="block rounded-lg px-3 py-2.5 text-sm font-medium focus-ring transition-colors"
-              style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-heading)" }}
-            >
-              {l.label}
-            </Link>
-          ))}
-          <a
-            href="#safety"
-            onClick={() => setMobileOpen(false)}
-            className="block rounded-lg px-3 py-2.5 text-sm font-medium focus-ring transition-colors"
-            style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-heading)" }}
-          >
-            Safety info
-          </a>
-          <div className="pt-3 flex gap-2">
-            <Link
-              to="/signin"
-              onClick={() => setMobileOpen(false)}
-              className="flex-1 rounded-lg border py-2.5 text-center text-sm font-medium focus-ring"
-              style={{ borderColor: "var(--color-border)", color: "var(--color-text-secondary)", fontFamily: "var(--font-heading)" }}
-            >
-              Sign in
-            </Link>
-            <Link
-              to="/signup"
-              onClick={() => setMobileOpen(false)}
-              className="flex-1 rounded-lg py-2.5 text-center text-sm font-semibold focus-ring"
-              style={{ background: "var(--color-accent)", color: "#fff", fontFamily: "var(--font-heading)" }}
-            >
-              Get started
-            </Link>
-          </div>
-        </nav>
-      </div>
-    </header>
-  );
-}
-
-/* ── Hero: three-panel tool selection ───────────────────────────────────── */
-/*
-   The hero IS the tool selection. Three panels, immediately visible,
-   each stating what it does, who it's for, and what it needs from the user.
-   This is both design and an accessibility/consent requirement.
-
-   Entrance: panels stagger in with translateY(24px)→0 + opacity 0→1.
-   The unifying statement enters first (40ms head start), then panels
-   at 80ms intervals. Uses CSS classes so prefers-reduced-motion collapses
-   the animation automatically (see globals.css).
-*/
-const TOOL_PANELS = [
-  {
-    id:          "sign",
-    icon:        <IcoHand s={28} />,
-    inputIcon:   <IcoCamera s={13} />,
-    inputLabel:  "Requires camera",
-    title:       "Sign Language Interpreter",
-    who:         "For sign language users and healthcare providers",
-    description: "Hold a sign in front of your camera. The browser extracts hand landmark coordinates locally and sends only those to the AI — your video never leaves your device. Results appear as plain text.",
-    cta:         "Open interpreter",
-    path:        "/sign-interpreter",
-    delay:       1,
-  },
-  {
-    id:          "caption",
-    icon:        <IcoMic s={28} />,
-    inputIcon:   <IcoMic s={13} />,
-    inputLabel:  "Requires microphone",
-    title:       "Live Captioner",
-    who:         "For deaf and hard-of-hearing patients in clinical settings",
-    description: "Spoken words are transcribed in real time with high-contrast captions. Designed for noisy environments, masked clinicians, and situations where speech cannot otherwise be heard.",
-    cta:         "Open captioner",
-    path:        "/captioner",
-    delay:       2,
-  },
-  {
-    id:          "derma",
-    icon:        <IcoScan s={28} />,
-    inputIcon:   <IcoPhoto s={13} />,
-    inputLabel:  "Requires a photo",
-    title:       "Derma-Scan",
-    who:         "For anyone with a skin concern to discuss with a clinician",
-    description: "Upload a photo of a skin concern. A compressed image is sent to the AI backend, which returns a plain-language summary of what's visible — not a diagnosis, but a structured starting point.",
-    cta:         "Open Derma-Scan",
-    path:        "/derma-scan",
-    delay:       3,
-  },
-] as const;
-
-function Hero() {
+function SectionTools() {
   return (
     <section
-      aria-label="AegisHub tools"
-      className="pt-28 pb-20 px-6 lg:px-10"
-      style={{ background: "var(--color-bg)" }}
+      id="features"
+      className="py-24 px-5 sm:px-8"
+      style={{ background: "#F0F2F7" }}
     >
-      <div className="mx-auto max-w-site">
-        {/* Unifying statement */}
-        <div className="hero-statement mb-12 max-w-2xl">
+      <div className="mx-auto max-w-[1100px]">
+        {/* Header */}
+        <div className="mb-14 max-w-2xl scroll-reveal" data-delay="0">
           <p
-            className="mb-3 text-sm font-medium"
-            style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-heading)" }}
+            className="mb-4 text-[12px] font-semibold uppercase tracking-wider"
+            style={{ color: "var(--color-accent)", fontFamily: "var(--font-heading)" }}
           >
-            GatewayHacks 2026 — Track 1: Accessibility &amp; Health
+            Platform tools
           </p>
-          <h1
-            className="mb-5 font-bold leading-tight"
+          <h2
+            className="font-bold leading-tight text-gray-900"
             style={{
+              fontSize: "clamp(26px, 3.5vw, 42px)",
+              letterSpacing: "-0.022em",
               fontFamily: "var(--font-heading)",
-              fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)",
-              letterSpacing: "-0.025em",
-              color: "var(--color-text-primary)",
+              lineHeight: 1.12,
             }}
           >
-            Three tools. One gateway.<br />
-            Healthcare communication that works.
-          </h1>
-          <p
-            className="text-lg leading-relaxed max-w-xl"
-            style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body)" }}
-          >
-            AegisHub brings sign language interpretation, live captioning, and AI-assisted skin analysis into one platform. Choose the tool that fits your situation.
-          </p>
+            Every tool built for a{" "}
+            <span style={{ fontFamily: "var(--font-heading)", fontStyle: "italic", fontWeight: 400 }}>
+              real clinical need.
+            </span>
+          </h2>
         </div>
 
-        {/* Three-panel grid */}
-        <div className="grid gap-px bg-border md:grid-cols-3 rounded-xl overflow-hidden" role="list" aria-label="Available tools">
-          {TOOL_PANELS.map((panel) => (
-            <article
-              key={panel.id}
-              role="listitem"
-              className={`hero-panel hero-panel-${panel.delay} flex flex-col bg-surface p-8`}
-              style={{ background: "var(--color-surface)" }}
+        {/* Bento-style grid — large card left + two stacked right */}
+        <div className="grid gap-4 lg:grid-cols-3 lg:grid-rows-2">
+
+          {/* Large featured card — Sign Language */}
+          <article
+            className="scroll-reveal flex flex-col rounded-3xl p-8 lg:col-span-2 lg:row-span-2"
+            data-delay="0"
+            style={{
+              background: "#0D1014",
+              minHeight: 380,
+            }}
+          >
+            <div
+              className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl"
+              style={{ background: "rgba(0,156,122,0.25)", color: "var(--color-accent)" }}
+              aria-hidden="true"
             >
-              {/* Icon */}
-              <div
-                className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl"
-                style={{
-                  background: "var(--color-accent-light)",
-                  color: "var(--color-accent)",
-                }}
-                aria-hidden="true"
-              >
-                {panel.icon}
-              </div>
-
-              {/* Input requirement — stated before the CTA (consent/accessibility) */}
-              <div
-                className="mb-4 inline-flex w-fit items-center gap-1.5 rounded-md px-2.5 py-1"
-                style={{
-                  background: "var(--color-surface-subtle)",
-                  color: "var(--color-text-muted)",
-                  border: "1px solid var(--color-border)",
-                }}
-              >
-                {panel.inputIcon}
-                <span className="text-xs font-medium" style={{ fontFamily: "var(--font-heading)" }}>
-                  {panel.inputLabel}
-                </span>
-              </div>
-
-              {/* Title + audience */}
-              <h2
-                className="mb-1.5 text-lg font-semibold leading-snug"
-                style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-heading)" }}
-              >
-                {panel.title}
-              </h2>
-              <p
-                className="mb-4 text-xs font-medium"
-                style={{ color: "var(--color-accent-text)", fontFamily: "var(--font-heading)" }}
-              >
-                {panel.who}
-              </p>
-
-              {/* Description */}
-              <p
-                className="mb-8 flex-1 text-sm leading-relaxed"
-                style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body)" }}
-              >
-                {panel.description}
-              </p>
-
-              {/* CTA — full-width at bottom of panel */}
+              <IcoHand s={24} />
+            </div>
+            <p className="mb-1 text-[12px] font-medium text-white/40 uppercase tracking-wide"
+              style={{ fontFamily: "var(--font-heading)" }}>
+              Requires camera
+            </p>
+            <h3
+              className="mb-3 font-semibold text-white leading-snug"
+              style={{ fontSize: "clamp(20px, 2.5vw, 28px)", fontFamily: "var(--font-heading)", letterSpacing: "-0.015em" }}
+            >
+              Sign Language Interpreter
+            </h3>
+            <p className="mb-8 text-[14px] leading-relaxed text-white/60 max-w-md"
+              style={{ fontFamily: "var(--font-heading)" }}>
+              Your camera captures hand movement. MediaPipe extracts 21 landmark
+              coordinates per frame — entirely in-browser. Only those lightweight
+              coordinates reach the LSTM model. Raw video never leaves your device.
+            </p>
+            <ul className="space-y-2 mb-auto">
+              {["Real-time hand landmark extraction", "AI gloss classification with confidence", "Alternative interpretations shown", "Works in noisy clinical environments"].map((f) => (
+                <li key={f} className="flex items-center gap-2.5 text-[13px] text-white/60"
+                  style={{ fontFamily: "var(--font-heading)" }}>
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/10" aria-hidden="true">
+                    <IcoCheck s={9} />
+                  </span>
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-8">
               <Link
-                to={panel.path}
-                className="cta-button inline-flex items-center justify-between gap-2 rounded-lg px-5 py-3 text-sm font-semibold focus-ring"
-                style={{
-                  background: "var(--color-accent)",
-                  color: "#fff",
-                  fontFamily: "var(--font-heading)",
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-accent-hover)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-accent)"; }}
+                to="/sign-interpreter"
+                className="inline-flex items-center gap-2.5 rounded-full bg-[#009C7A] py-2 pl-5 pr-2 text-[13px] font-medium text-white transition-all duration-200 hover:bg-[#00B389] focus-ring"
+                style={{ fontFamily: "var(--font-heading)" }}
               >
-                {panel.cta}
-                <IcoArrowRight s={14} />
+                Open interpreter
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
+                  <IcoChevronRight s={12} />
+                </span>
               </Link>
-            </article>
-          ))}
-        </div>
+            </div>
+          </article>
 
-        {/* Below-panel trust line */}
-        <p
-          className="mt-6 text-xs text-center"
-          style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-body)" }}
-        >
-          AI-assisted tools. Not a substitute for medical advice. See{" "}
-          <a
-            href="#safety"
-            className="underline underline-offset-2 focus-ring rounded"
-            style={{ color: "var(--color-text-muted)" }}
+          {/* Card — Live Captioner */}
+          <article
+            className="scroll-reveal flex flex-col rounded-3xl p-7"
+            data-delay="60"
+            style={{ background: "#FFFFFF", border: "1px solid var(--color-border)" }}
           >
-            safety information
-          </a>{" "}
-          before use.
-        </p>
+            <div
+              className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl"
+              style={{ background: "var(--color-accent-light)", color: "var(--color-accent)" }}
+              aria-hidden="true"
+            >
+              <IcoMic s={22} />
+            </div>
+            <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-gray-500"
+              style={{ fontFamily: "var(--font-heading)" }}>
+              Requires microphone
+            </p>
+            <h3
+              className="mb-2 font-semibold leading-snug text-gray-900"
+              style={{ fontSize: "clamp(16px, 2vw, 20px)", fontFamily: "var(--font-heading)", letterSpacing: "-0.01em" }}
+            >
+              Live Captioner
+            </h3>
+            <p className="mb-auto text-[13px] leading-relaxed text-gray-600"
+              style={{ fontFamily: "var(--font-heading)" }}>
+              Real-time high-contrast captions for deaf and hard-of-hearing patients.
+              Built for masked clinicians, noisy wards, and critical conversations.
+            </p>
+            <Link
+              to="/captioner"
+              className="mt-6 inline-flex items-center gap-1.5 text-[13px] font-medium text-[#009C7A] transition-colors hover:text-[#00846A] focus-ring rounded"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              Open captioner <IcoChevronRight s={12} />
+            </Link>
+          </article>
+
+          {/* Card — Derma-Scan */}
+          <article
+            className="scroll-reveal flex flex-col rounded-3xl p-7"
+            data-delay="120"
+            style={{ background: "#FFFFFF", border: "1px solid var(--color-border)" }}
+          >
+            <div
+              className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl"
+              style={{ background: "var(--color-accent-light)", color: "var(--color-accent)" }}
+              aria-hidden="true"
+            >
+              <IcoScan s={22} />
+            </div>
+            <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-gray-500"
+              style={{ fontFamily: "var(--font-heading)" }}>
+              Requires photo upload
+            </p>
+            <h3
+              className="mb-2 font-semibold leading-snug text-gray-900"
+              style={{ fontSize: "clamp(16px, 2vw, 20px)", fontFamily: "var(--font-heading)", letterSpacing: "-0.01em" }}
+            >
+              Derma-Scan
+            </h3>
+            <p className="mb-auto text-[13px] leading-relaxed text-gray-600"
+              style={{ fontFamily: "var(--font-heading)" }}>
+              Upload a photo of a skin concern. One compressed image is sent,
+              analysed, then discarded. Returns a plain-language triage observation,
+              never a diagnosis.
+            </p>
+            <Link
+              to="/derma-scan"
+              className="mt-6 inline-flex items-center gap-1.5 text-[13px] font-medium text-[#009C7A] transition-colors hover:text-[#00846A] focus-ring rounded"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              Open Derma-Scan <IcoChevronRight s={12} />
+            </Link>
+          </article>
+        </div>
       </div>
     </section>
   );
 }
 
-/* ── Split-processing explainer ─────────────────────────────────────────── */
-/*
-   This is the real technical differentiator: the browser never sends raw
-   video/audio. Only extracted coordinates, meshes, or a compressed image
-   cross the network. This earns trust; it gets a real section.
-*/
-const PROCESSING_POINTS = [
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 03 — How It Works (4-step sequence)
+────────────────────────────────────────────────────────────────────────── */
+const HOW_STEPS = [
   {
-    tool:   "Sign Language",
-    input:  "Camera video",
-    keeps:  "Full video stream",
-    sends:  "21 hand landmark coordinates (X, Y, Z) per frame",
-    why:    "MediaPipe extracts joint positions in the browser. The AI needs coordinates, not pixels.",
+    n: "01",
+    title: "Choose your tool",
+    body: "Select the modality that fits the situation — signing, speech, or a photo. Each tool is independent and can be used without the others.",
   },
   {
-    tool:   "Live Captioner",
-    input:  "Microphone audio",
-    keeps:  "Full audio recording",
-    sends:  "Compressed audio chunks to a speech-to-text service",
-    why:    "Audio is processed in near-real time; only the audio frames needed for the current utterance are transmitted.",
+    n: "02",
+    title: "Grant access",
+    body: "The browser requests only what it needs: camera, microphone, or a file. Nothing activates until you explicitly allow it.",
   },
   {
-    tool:   "Derma-Scan",
-    input:  "Photo upload",
-    keeps:  "Original high-resolution image",
-    sends:  "One compressed JPEG, then discarded server-side after analysis",
-    why:    "The image needs to reach the model, but only once — it is not stored or retained.",
+    n: "03",
+    title: "Local processing",
+    body: "Heavy computation runs in your browser. Hand coordinates, audio chunks, or a compressed image are prepared before anything is transmitted.",
+  },
+  {
+    n: "04",
+    title: "Read the result",
+    body: "Plain-language output appears immediately. Interpreted sign, live caption, or a structured skin observation — with confidence shown where applicable.",
   },
 ] as const;
 
-function SplitProcessing() {
+function SectionHowItWorks() {
   return (
     <section
       id="how-it-works"
-      aria-labelledby="processing-heading"
-      className="py-24 px-6 lg:px-10"
-      style={{ background: "var(--color-surface)" }}
+      className="py-24 px-5 sm:px-8"
+      style={{ background: "#FFFFFF" }}
     >
-      <div className="mx-auto max-w-site">
-        {/* Section header */}
-        <div className="mb-16 max-w-2xl">
+      <div className="mx-auto max-w-[1100px]">
+        <div className="mb-16 max-w-xl scroll-reveal" data-delay="0">
           <p
-            className="mb-4 text-sm font-medium"
-            style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-heading)" }}
+            className="mb-4 text-[12px] font-semibold uppercase tracking-wider"
+            style={{ color: "var(--color-accent)", fontFamily: "var(--font-heading)" }}
           >
-            How the data flows
+            How it works
           </p>
           <h2
-            id="processing-heading"
-            className="mb-5 font-bold leading-tight"
+            className="font-bold leading-tight text-gray-900"
             style={{
+              fontSize: "clamp(26px, 3.5vw, 42px)",
+              letterSpacing: "-0.022em",
               fontFamily: "var(--font-heading)",
-              fontSize: "clamp(1.75rem, 3vw, 2.5rem)",
-              letterSpacing: "-0.02em",
-              color: "var(--color-text-primary)",
+              lineHeight: 1.12,
             }}
           >
-            Your raw data stays in your browser.
-          </h2>
-          <p
-            className="text-base leading-relaxed"
-            style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body)" }}
-          >
-            Every AegisHub tool follows the same principle: heavy processing happens locally in your browser, and only the lightweight result of that processing — coordinates, not video — is sent to the AI. This is not a privacy promise bolted on after the fact; it is the architecture.
-          </p>
-        </div>
-
-        {/* Per-tool breakdown */}
-        <div className="space-y-px rounded-xl overflow-hidden" style={{ border: "1px solid var(--color-border)" }}>
-          {PROCESSING_POINTS.map((p, i) => (
-            <div
-              key={p.tool}
-              data-reveal="rr-fade-up"
-              data-delay={`rr-delay-${i + 1}`}
-              className="grid gap-6 p-8 md:grid-cols-3"
-              style={{
-                background: "var(--color-surface)",
-                borderBottom: i < PROCESSING_POINTS.length - 1 ? "1px solid var(--color-border)" : "none",
-              }}
-            >
-              {/* Tool label */}
-              <div>
-                <p
-                  className="mb-1 text-sm font-semibold"
-                  style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-heading)" }}
-                >
-                  {p.tool}
-                </p>
-                <p
-                  className="text-xs"
-                  style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-body)" }}
-                >
-                  Input: {p.input}
-                </p>
-              </div>
-
-              {/* What stays vs what's sent */}
-              <div className="space-y-3">
-                <div className="flex items-start gap-2.5">
-                  <span
-                    className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold"
-                    style={{ background: "var(--color-surface-subtle)", color: "var(--color-text-muted)" }}
-                    aria-label="Stays in browser"
-                  >
-                    ✕
-                  </span>
-                  <div>
-                    <p className="text-xs font-medium" style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-heading)" }}>Stays in browser</p>
-                    <p className="text-xs mt-0.5" style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body)" }}>{p.keeps}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <span
-                    className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold"
-                    style={{ background: "var(--color-accent-light)", color: "var(--color-accent)" }}
-                    aria-label="Sent to AI"
-                  >
-                    ✓
-                  </span>
-                  <div>
-                    <p className="text-xs font-medium" style={{ color: "var(--color-accent-text)", fontFamily: "var(--font-heading)" }}>Sent to AI</p>
-                    <p className="text-xs mt-0.5" style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body)" }}>{p.sends}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Why */}
-              <div>
-                <p className="text-xs font-medium mb-1" style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-heading)" }}>Why</p>
-                <p className="text-xs leading-relaxed" style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body)" }}>{p.why}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ── How it works: four steps ────────────────────────────────────────────── */
-/*
-   Numbers 01–04 are used here because this IS a sequence. The content
-   earns the numbering — it is not decorative chrome.
-*/
-const HOW_STEPS = [
-  {
-    n:     "01",
-    title: "Choose your tool",
-    body:  "Select the modality that fits the situation: signing, speech, or a photo of a skin concern.",
-  },
-  {
-    n:     "02",
-    title: "Grant access",
-    body:  "The browser asks for camera, microphone, or file access. Nothing is activated until you say so.",
-  },
-  {
-    n:     "03",
-    title: "Processing happens locally",
-    body:  "Hand coordinates, audio chunks, or a compressed image are prepared in your browser. Heavy data never leaves your device.",
-  },
-  {
-    n:     "04",
-    title: "Read the result",
-    body:  "Plain-language output appears immediately — interpreted sign, live caption, or a structured skin observation. Confidence is shown where it applies.",
-  },
-] as const;
-
-function HowItWorks() {
-  return (
-    <section
-      aria-labelledby="steps-heading"
-      className="py-24 px-6 lg:px-10"
-      style={{ background: "var(--color-bg)" }}
-    >
-      <div className="mx-auto max-w-site">
-        <div className="mb-14 max-w-xl">
-          <p
-            className="mb-4 text-sm font-medium"
-            style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-heading)" }}
-          >
-            From input to result
-          </p>
-          <h2
-            id="steps-heading"
-            className="font-bold leading-tight"
-            style={{
-              fontFamily: "var(--font-heading)",
-              fontSize: "clamp(1.75rem, 3vw, 2.5rem)",
-              letterSpacing: "-0.02em",
-              color: "var(--color-text-primary)",
-            }}
-          >
-            Four steps, end to end.
+            From input to result<br />in four steps.
           </h2>
         </div>
 
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          {HOW_STEPS.map((s, i) => (
-            <div
-              key={s.n}
-              data-reveal="rr-fade-up"
-              data-delay={`rr-delay-${i + 1}`}
-              className="relative"
-            >
-              {/* Connector line between steps (desktop only) */}
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {HOW_STEPS.map((step, i) => (
+            <div key={step.n} className="relative scroll-reveal" data-delay={String(i * 60)}>
+              {/* Connector line between steps — desktop */}
               {i < HOW_STEPS.length - 1 && (
                 <div
-                  className="absolute top-4 hidden h-px lg:block"
+                  className="absolute top-5 hidden h-px lg:block"
                   style={{
-                    width: "calc(100% - 2.5rem)",
-                    left: "calc(100% - 1.25rem)",
+                    left: "calc(100% - 1rem)",
+                    width: "calc(100% - 1rem)",
                     background: "var(--color-border)",
                   }}
                   aria-hidden="true"
                 />
               )}
-
-              {/* Step number */}
               <p
-                className="mb-4 text-3xl font-bold leading-none"
+                className="mb-4 font-bold leading-none text-gray-200"
                 style={{
+                  fontSize: "2.5rem",
                   fontFamily: "var(--font-mono)",
-                  color: "var(--color-border-strong)",
-                  letterSpacing: "-0.03em",
+                  letterSpacing: "-0.04em",
                 }}
                 aria-hidden="true"
               >
-                {s.n}
+                {step.n}
               </p>
-
-              <p
-                className="mb-2 text-base font-semibold"
-                style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-heading)" }}
+              <h3
+                className="mb-2 font-semibold text-gray-900"
+                style={{ fontSize: "15px", fontFamily: "var(--font-heading)" }}
               >
-                {s.title}
-              </p>
+                {step.title}
+              </h3>
               <p
-                className="text-sm leading-relaxed"
-                style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body)" }}
+                className="text-[13px] leading-relaxed text-gray-600"
+                style={{ fontFamily: "var(--font-heading)" }}
               >
-                {s.body}
+                {step.body}
               </p>
             </div>
           ))}
@@ -693,207 +550,218 @@ function HowItWorks() {
   );
 }
 
-/* ── Medical safety disclaimer — its own section ─────────────────────────── */
-/*
-   Brief requirement: "visible, plainly worded, not hidden in fine print."
-   This gets the same visual weight as any other content section.
-   Using role="note" and aria-labelledby so screen readers announce it clearly.
-*/
-function SafetySection() {
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 04 — Privacy & Split-Processing
+   This is a real technical differentiator — earns its own section.
+────────────────────────────────────────────────────────────────────────── */
+const PRIVACY_ROWS = [
+  {
+    tool: "Sign Language",
+    keeps: "Full video stream stays in browser",
+    sends: "21 landmark coordinates (X, Y, Z) per frame",
+    why: "The AI needs joint positions, not pixels. MediaPipe extracts them locally.",
+  },
+  {
+    tool: "Live Captioner",
+    keeps: "Continuous microphone feed stays local",
+    sends: "Compressed audio chunks, per utterance",
+    why: "Only the audio needed for the current sentence is transmitted, then discarded.",
+  },
+  {
+    tool: "Derma-Scan",
+    keeps: "Original high-resolution photo stays local",
+    sends: "One compressed JPEG, discarded after analysis",
+    why: "The image crosses the network once, is never stored, and is deleted post-analysis.",
+  },
+] as const;
+
+function SectionPrivacy() {
+  return (
+    <section
+      className="py-24 px-5 sm:px-8"
+      style={{ background: "#F0F2F7" }}
+    >
+      <div className="mx-auto max-w-[1100px]">
+        <div className="grid gap-16 lg:grid-cols-[1fr_1.5fr] lg:items-start">
+          {/* Left — sticky-ish heading block */}
+          <div className="lg:sticky lg:top-8 scroll-reveal" data-delay="0">
+            <p
+              className="mb-4 text-[12px] font-semibold uppercase tracking-wider"
+              style={{ color: "var(--color-accent)", fontFamily: "var(--font-heading)" }}
+            >
+              Privacy by design
+            </p>
+            <h2
+              className="mb-5 font-bold leading-tight text-gray-900"
+              style={{
+                fontSize: "clamp(24px, 3vw, 38px)",
+                letterSpacing: "-0.022em",
+                fontFamily: "var(--font-heading)",
+                lineHeight: 1.12,
+              }}
+            >
+              Your raw data<br />
+              <span style={{ fontFamily: "var(--font-heading)", fontStyle: "italic", fontWeight: 400 }}>
+                never leaves
+              </span>
+              <br />
+              your browser.
+            </h2>
+            <p
+              className="text-[14px] leading-relaxed text-gray-600"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              This is not a privacy promise added after the fact. It is the
+              architecture. Heavy processing runs locally, and only the extracted
+              result — coordinates, not video — crosses the network.
+            </p>
+          </div>
+
+          {/* Right — per-tool rows */}
+          <div
+            className="scroll-reveal rounded-3xl overflow-hidden"
+            data-delay="60"
+            style={{ border: "1px solid var(--color-border)", background: "#FFFFFF" }}
+          >
+            {PRIVACY_ROWS.map((row, i) => (
+              <div
+                key={row.tool}
+                className="p-7"
+                style={{ borderBottom: i < PRIVACY_ROWS.length - 1 ? "1px solid var(--color-border)" : "none" }}
+              >
+                <p
+                  className="mb-4 text-[13px] font-semibold text-gray-900"
+                  style={{ fontFamily: "var(--font-heading)" }}
+                >
+                  {row.tool}
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="flex items-start gap-2.5">
+                    <span
+                      className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold"
+                      style={{ background: "#F0F1F5", color: "#8C90A0" }}
+                      aria-label="Stays in browser"
+                    >&#x2715;</span>
+                    <div>
+                      <p className="text-[11px] font-medium mb-0.5 text-gray-500" style={{ fontFamily: "var(--font-heading)" }}>
+                        Stays in browser
+                      </p>
+                      <p className="text-[12px] text-gray-600" style={{ fontFamily: "var(--font-heading)" }}>
+                        {row.keeps}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <span
+                      className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold"
+                      style={{ background: "var(--color-accent-light)", color: "var(--color-accent)" }}
+                      aria-label="Sent to AI"
+                    >&#x2713;</span>
+                    <div>
+                      <p className="text-[11px] font-medium mb-0.5" style={{ color: "var(--color-accent-text)", fontFamily: "var(--font-heading)" }}>
+                        Sent to AI
+                      </p>
+                      <p className="text-[12px] text-gray-600" style={{ fontFamily: "var(--font-heading)" }}>
+                        {row.sends}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-3 text-[12px] leading-relaxed text-gray-500" style={{ fontFamily: "var(--font-heading)" }}>
+                  <span className="font-medium text-gray-700">Why: </span>
+                  {row.why}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 05 — Medical Safety
+   Required by the brief — visible, plainly worded, not fine print.
+────────────────────────────────────────────────────────────────────────── */
+function SectionSafety() {
   return (
     <section
       id="safety"
+      className="py-24 px-5 sm:px-8"
+      style={{ background: "#FFFFFF" }}
       aria-labelledby="safety-heading"
-      role="note"
-      className="py-20 px-6 lg:px-10"
-      style={{ background: "var(--color-surface)" }}
     >
-      <div className="mx-auto max-w-site">
-        <div className="rounded-xl p-8 md:p-12" style={{ border: "1px solid var(--color-border)", background: "var(--color-bg)" }}>
-          <div className="mb-6 flex items-start gap-4">
+      <div className="mx-auto max-w-[1100px]">
+        <div
+          className="scroll-reveal rounded-3xl p-8 sm:p-12"
+          style={{ background: "#F0F2F7", border: "1px solid var(--color-border)" }}
+        >
+          <div className="flex items-start gap-5 mb-8">
             <div
-              className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
               style={{ background: "var(--color-accent-light)", color: "var(--color-accent)" }}
               aria-hidden="true"
             >
-              <IcoShield s={20} />
+              <IcoShield s={22} />
             </div>
             <div>
               <h2
                 id="safety-heading"
-                className="text-lg font-semibold mb-1"
-                style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-heading)" }}
+                className="font-semibold mb-1 text-gray-900"
+                style={{ fontSize: "18px", fontFamily: "var(--font-heading)" }}
               >
                 These tools are assistive, not diagnostic.
               </h2>
               <p
-                className="text-sm font-medium"
-                style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-heading)" }}
+                className="text-[13px] text-gray-500"
+                style={{ fontFamily: "var(--font-heading)" }}
               >
                 Read before using AegisHub in any clinical or health-related context.
               </p>
             </div>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-3">
             {[
               {
-                heading: "Not a medical device",
-                body: "AegisHub is a communication and accessibility tool. It does not diagnose conditions, prescribe treatment, or replace the clinical judgment of a qualified healthcare professional.",
+                title: "Not a medical device",
+                body: "AegisHub is a communication and accessibility tool. It does not diagnose conditions, prescribe treatment, or replace the judgment of a qualified healthcare professional.",
               },
               {
-                heading: "Results may be incorrect",
-                body: "AI outputs — sign interpretations, captions, and skin observations — can be wrong. Confidence scores are shown where available, but a high confidence score is not a guarantee of accuracy.",
+                title: "Results may be incorrect",
+                body: "AI outputs — sign interpretations, captions, and skin observations — can be wrong. Confidence scores are displayed where available, but high confidence is not a guarantee of accuracy.",
               },
               {
-                heading: "Emergencies",
+                title: "Emergencies",
                 body: "If you or someone else is experiencing a medical emergency, contact emergency services immediately. Do not rely on any AI tool for emergency communication.",
               },
             ].map((item) => (
-              <div key={item.heading}>
+              <div key={item.title}>
                 <p
-                  className="mb-2 text-sm font-semibold"
-                  style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-heading)" }}
+                  className="mb-2 text-[13px] font-semibold text-gray-900"
+                  style={{ fontFamily: "var(--font-heading)" }}
                 >
-                  {item.heading}
+                  {item.title}
                 </p>
                 <p
-                  className="text-sm leading-relaxed"
-                  style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body)" }}
+                  className="text-[13px] leading-relaxed text-gray-600"
+                  style={{ fontFamily: "var(--font-heading)" }}
                 >
                   {item.body}
                 </p>
               </div>
             ))}
           </div>
-        </div>
-      </div>
-    </section>
-  );
-}
 
-/* ── FAQ ─────────────────────────────────────────────────────────────────── */
-const FAQS = [
-  {
-    q: "Does AegisHub send raw video to its servers?",
-    a: "No. The camera is used locally in your browser to extract hand landmark coordinates. Only those lightweight coordinates — never raw video frames — are sent to the AI backend for classification.",
-  },
-  {
-    q: "Is the Derma-Scan output a medical diagnosis?",
-    a: "No. Derma-Scan provides an AI-assisted observation to support — not replace — professional medical assessment. It is a structured starting point for a conversation with a clinician, not a diagnosis. Always consult a qualified healthcare provider.",
-  },
-  {
-    q: "How accurate is the sign language interpretation?",
-    a: "Accuracy depends on sign clarity, lighting, and camera quality. A confidence score is shown with every result so clinicians and patients can assess reliability before acting on it.",
-  },
-  {
-    q: "What browsers and devices does AegisHub support?",
-    a: "AegisHub is built on standard browser APIs (MediaDevices, WebGL). It works on modern Chrome, Edge, Firefox, and Safari on desktop and mobile. Camera and microphone features require a secure context (HTTPS or localhost).",
-  },
-  {
-    q: "Is AegisHub free?",
-    a: "The platform is free to use. It was built for GatewayHacks 2026 and is openly accessible for demonstration and accessibility research purposes.",
-  },
-  {
-    q: "What happens to my data?",
-    a: "Raw camera video and audio are never stored or transmitted. Extracted data (coordinates, audio chunks) is used only for real-time inference and is not retained. Uploaded Derma-Scan images are discarded after analysis.",
-  },
-] as const;
-
-function FAQ() {
-  const [open, setOpen] = useState<number | null>(null);
-
-  return (
-    <section
-      id="faq"
-      aria-labelledby="faq-heading"
-      className="py-24 px-6 lg:px-10"
-      style={{ background: "var(--color-bg)" }}
-    >
-      <div className="mx-auto max-w-site">
-        <div className="grid gap-16 lg:grid-cols-[1fr_2fr]">
-          {/* Left: heading + link to help */}
-          <div>
-            <p
-              className="mb-4 text-sm font-medium"
-              style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-heading)" }}
-            >
-              Common questions
-            </p>
-            <h2
-              id="faq-heading"
-              className="mb-5 font-bold leading-tight"
-              style={{
-                fontFamily: "var(--font-heading)",
-                fontSize: "clamp(1.5rem, 2.5vw, 2rem)",
-                letterSpacing: "-0.02em",
-                color: "var(--color-text-primary)",
-              }}
-            >
-              What you should know before you use this.
-            </h2>
-            <p
-              className="mb-8 text-sm leading-relaxed"
-              style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body)" }}
-            >
-              More detailed information — including accessibility statements, privacy details, and technical limitations — is on the Help page.
-            </p>
+          <div className="mt-8 pt-8 border-t" style={{ borderColor: "var(--color-border)" }}>
             <Link
               to="/help"
-              className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold focus-ring"
-              style={{ background: "var(--color-accent)", color: "#fff", fontFamily: "var(--font-heading)" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-accent-hover)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-accent)"; }}
+              className="text-[13px] font-medium text-[#009C7A] transition-colors hover:text-[#00846A] focus-ring rounded"
+              style={{ fontFamily: "var(--font-heading)" }}
             >
-              Help &amp; documentation
+              Read full safety documentation &rarr;
             </Link>
-          </div>
-
-          {/* Right: accordion */}
-          <div data-reveal="rr-fade-up">
-            {FAQS.map((f, i) => (
-              <div key={f.q} style={{ borderBottom: "1px solid var(--color-border)" }}>
-                <button
-                  type="button"
-                  className="flex w-full items-start justify-between gap-6 py-5 text-left focus-ring rounded"
-                  onClick={() => setOpen(open === i ? null : i)}
-                  aria-expanded={open === i}
-                  aria-controls={`faq-answer-${i}`}
-                >
-                  <span
-                    className="text-sm font-medium"
-                    style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-heading)" }}
-                  >
-                    {f.q}
-                  </span>
-                  <span
-                    className="mt-0.5 shrink-0 transition-transform duration-200"
-                    style={{
-                      color: "var(--color-text-muted)",
-                      transform: open === i ? "rotate(180deg)" : "rotate(0deg)",
-                    }}
-                    aria-hidden="true"
-                  >
-                    <IcoChevronDown />
-                  </span>
-                </button>
-
-                <div
-                  id={`faq-answer-${i}`}
-                  role="region"
-                  className="overflow-hidden transition-all duration-200"
-                  style={{ maxHeight: open === i ? "240px" : "0" }}
-                  aria-hidden={open !== i}
-                >
-                  <p
-                    className="pb-5 text-sm leading-relaxed"
-                    style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body)" }}
-                  >
-                    {f.a}
-                  </p>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </div>
@@ -901,175 +769,99 @@ function FAQ() {
   );
 }
 
-/* ── Footer ──────────────────────────────────────────────────────────────── */
-function Footer() {
-  const TOOL_LINKS = [
-    { label: "Sign Language Interpreter", to: "/sign-interpreter" },
-    { label: "Live Captioner",            to: "/captioner" },
-    { label: "Derma-Scan",               to: "/derma-scan" },
-    { label: "Dashboard",                to: "/dashboard" },
-  ];
-  const INFO_LINKS = [
-    { label: "Safety information",  to: "/help",     anchor: "#safety" },
-    { label: "Help & documentation", to: "/help",    anchor: "" },
-    { label: "Privacy details",     to: "/help",     anchor: "" },
-    { label: "Accessibility",       to: "/help",     anchor: "" },
-  ];
-  const ACCOUNT_LINKS = [
-    { label: "Sign in",    to: "/signin" },
-    { label: "Sign up",    to: "/signup" },
-    { label: "Settings",   to: "/settings" },
-    { label: "History",    to: "/history" },
-  ];
-
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION 06 — Final CTA
+   Dark container, strong headline, primary + secondary CTAs.
+   Mirrors the premium close-out quality from the Convix reference.
+────────────────────────────────────────────────────────────────────────── */
+function SectionFinalCTA() {
   return (
-    <footer
-      role="contentinfo"
-      style={{ background: "var(--color-surface)", borderTop: "1px solid var(--color-border)" }}
+    <section
+      className="py-8 px-5 sm:px-8 sm:pb-8"
+      style={{ background: "#F0F2F7" }}
     >
-      <div className="mx-auto max-w-site px-6 py-16 lg:px-10">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Brand column */}
-          <div className="sm:col-span-2 lg:col-span-1">
-            <Link to="/" className="mb-4 flex items-center gap-2.5 focus-ring rounded w-fit">
-              <div
-                className="flex h-7 w-7 items-center justify-center rounded-lg"
-                style={{ background: "var(--color-accent)" }}
-                aria-hidden="true"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2L3 8v5c0 5 4 9 9 11 5-2 9-6 9-11V8L12 2z" fill="white" fillOpacity="0.95" />
-                  <path d="M9 12l2 2 4-4" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-              <span
-                className="text-sm font-bold"
-                style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-heading)" }}
-              >
-                AegisHub
-              </span>
-            </Link>
-            <p
-              className="mb-4 text-sm leading-relaxed"
-              style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body)" }}
-            >
-              A health accessibility gateway combining sign language interpretation, live captioning, and AI-assisted skin analysis.
-            </p>
-            {/* Disclaimer link repeated in footer — required by brief */}
-            <a
-              href="#safety"
-              className="text-xs underline underline-offset-2 focus-ring rounded"
-              style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-heading)" }}
-            >
-              Medical disclaimer
-            </a>
-          </div>
-
-          {/* Tools */}
-          <div>
-            <p
-              className="mb-4 text-xs font-semibold"
-              style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-heading)" }}
-            >
-              Tools
-            </p>
-            <ul className="space-y-2.5">
-              {TOOL_LINKS.map((l) => (
-                <li key={l.label}>
-                  <Link
-                    to={l.to}
-                    className="text-sm focus-ring rounded transition-colors"
-                    style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body)" }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-primary)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-secondary)"; }}
-                  >
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Safety & info */}
-          <div>
-            <p
-              className="mb-4 text-xs font-semibold"
-              style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-heading)" }}
-            >
-              Safety &amp; info
-            </p>
-            <ul className="space-y-2.5">
-              {INFO_LINKS.map((l) => (
-                <li key={l.label}>
-                  <Link
-                    to={l.to + l.anchor}
-                    className="text-sm focus-ring rounded transition-colors"
-                    style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body)" }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-primary)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-secondary)"; }}
-                  >
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Account */}
-          <div>
-            <p
-              className="mb-4 text-xs font-semibold"
-              style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-heading)" }}
-            >
-              Account
-            </p>
-            <ul className="space-y-2.5">
-              {ACCOUNT_LINKS.map((l) => (
-                <li key={l.label}>
-                  <Link
-                    to={l.to}
-                    className="text-sm focus-ring rounded transition-colors"
-                    style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-body)" }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-primary)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-secondary)"; }}
-                  >
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Bottom bar */}
+      <div className="mx-auto max-w-[1100px]">
         <div
-          className="mt-14 flex flex-col gap-2 border-t pt-8 sm:flex-row sm:items-center sm:justify-between"
-          style={{ borderColor: "var(--color-border)" }}
+          className="scroll-reveal relative overflow-hidden rounded-3xl px-8 py-16 text-center sm:px-16"
+          style={{ background: "#0D1014" }}
         >
-          <p
-            className="text-xs"
-            style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-body)" }}
-          >
-            © {new Date().getFullYear()} AegisHub. Built for GatewayHacks 2026 — Track 1: Accessibility &amp; Health.
-          </p>
-          <p
-            className="text-xs"
-            style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-body)" }}
-          >
-            AI-assisted tools only — not a medical device or diagnostic service.
-          </p>
+          {/* Subtle teal glow */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            aria-hidden="true"
+            style={{
+              background: "radial-gradient(ellipse 70% 60% at 50% 0%, rgba(0,156,122,0.20) 0%, transparent 70%)",
+            }}
+          />
+
+          <div className="relative z-10">
+            <p
+              className="mb-5 text-[12px] font-semibold uppercase tracking-wider text-white/40"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              Get started today
+            </p>
+            <h2
+              className="mx-auto mb-5 max-w-2xl font-bold text-white leading-tight"
+              style={{
+                fontSize: "clamp(26px, 4vw, 48px)",
+                letterSpacing: "-0.025em",
+                fontFamily: "var(--font-heading)",
+                lineHeight: 1.1,
+              }}
+            >
+              Healthcare communication<br />
+              that{" "}
+              <span style={{ fontFamily: "var(--font-heading)", fontStyle: "italic", fontWeight: 400 }}>
+                actually works.
+              </span>
+            </h2>
+            <p
+              className="mx-auto mb-10 max-w-md text-[14px] leading-relaxed text-white/50"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              Sign language, live captions, and skin triage — open the platform and
+              start a session in under a minute.
+            </p>
+
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+              <Link
+                to="/signup"
+                className="inline-flex items-center gap-3 rounded-full bg-[#009C7A] py-2.5 pl-7 pr-2 text-[14px] font-semibold text-white transition-all duration-200 hover:bg-[#00B389] hover:shadow-lg hover:shadow-[#009C7A]/25 focus-ring"
+                style={{ fontFamily: "var(--font-heading)" }}
+              >
+                Create free account
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20">
+                  <IcoChevronRight />
+                </span>
+              </Link>
+              <Link
+                to="/dashboard"
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 px-6 py-2.5 text-[14px] font-medium text-white/80 transition-all duration-200 hover:border-white/40 hover:text-white focus-ring"
+                style={{ fontFamily: "var(--font-heading)" }}
+              >
+                Open dashboard
+              </Link>
+            </div>
+
+            <p
+              className="mt-8 text-[12px] text-white/30"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              AI-assisted only &middot; Not a medical device &middot; Free for demonstration purposes
+            </p>
+          </div>
         </div>
       </div>
-    </footer>
+    </section>
   );
 }
 
-/* ── Page composition ────────────────────────────────────────────────────── */
+/* ──────────────────────────────────────────────────────────────────────────
+   PAGE COMPOSITION
+────────────────────────────────────────────────────────────────────────── */
 export default function HomePage() {
-  const { theme, toggleTheme } = useTheme();
-  /* useScrollReveal observes [data-reveal] elements — used in SplitProcessing,
-     HowItWorks, and FAQ sections only. Not applied to hero (CSS animation). */
-  const pageRef = useScrollReveal("-60px 0px");
+  useScrollReveal();
 
   return (
     <>
@@ -1077,20 +869,38 @@ export default function HomePage() {
         title="AegisHub — Health Accessibility Gateway"
         description="Sign language interpretation, live captioning, and AI-assisted skin analysis. Three tools, one platform, your data stays in your browser."
       />
-      <div
-        ref={pageRef as React.RefObject<HTMLDivElement>}
-        style={{ background: "var(--color-bg)", color: "var(--color-text-primary)" }}
+
+      {/* Outer wrapper — light neutral page background */}
+      <main
+        className="min-h-screen w-full"
+        style={{ background: "#F0F2F7", fontFamily: "var(--font-heading)" }}
       >
-        <Navbar theme={theme} onToggle={toggleTheme} />
-        <main>
-          <Hero />
-          <SplitProcessing />
-          <HowItWorks />
-          <SafetySection />
-          <FAQ />
-        </main>
-        <Footer />
-      </div>
+        {/* ── HERO — rounded full-viewport canvas ─── */}
+        <div className="p-3 sm:p-4">
+          <section
+            className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl"
+            style={{ height: "calc(100vh - 24px)" }}
+            aria-label="AegisHub hero"
+          >
+            <Aurora />
+            <div className="absolute inset-0 bg-white/[0.03]" aria-hidden="true" />
+            <div className="relative z-10">
+              <HomeNav />
+              <HeroContent />
+              <ProductPreview />
+            </div>
+          </section>
+        </div>
+
+        {/* ── BELOW-FOLD SECTIONS ─── */}
+        <SectionIntro />
+        <SectionTools />
+        <SectionHowItWorks />
+        <SectionPrivacy />
+        <SectionSafety />
+        <SectionFinalCTA />
+        <HomeFooter />
+      </main>
     </>
   );
 }
