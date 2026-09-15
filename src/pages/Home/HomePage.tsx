@@ -100,9 +100,9 @@ function HeroContent() {
         style={{
           fontSize: "clamp(34px, 7.5vw, 70px)",
           lineHeight: 1.05,
-          fontWeight: 600,
+          fontWeight: 400,
           letterSpacing: "-0.025em",
-          fontFamily: "var(--font-heading)",
+          fontFamily: "var(--font-body)",
         }}
       >
         <BlurFadeIn
@@ -130,7 +130,7 @@ function HeroContent() {
 
       <p
         className="mt-4 max-w-xl px-2 text-white/60 sm:mt-5"
-        style={{ fontSize: "clamp(14px, 3.2vw, 17px)", fontFamily: "var(--font-heading)", lineHeight: 1.65, fontWeight: 300 }}
+        style={{ fontSize: "clamp(14px, 3.2vw, 17px)", fontFamily: "var(--font-body)", lineHeight: 1.65, fontWeight: 400 }}
       >
         Sign language interpretation, live clinical captions, and AI-assisted
         skin analysis — in one platform, with your data staying in your browser.
