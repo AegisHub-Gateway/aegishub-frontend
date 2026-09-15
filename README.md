@@ -18,13 +18,13 @@ All three tools run in **mock mode** by default, returning simulated data so the
 
 Each tool has a dedicated page with real-time UI. Screenshots can be captured from the running app.
 
-| Tool | Preview | Description |
-|------|---------|-------------|
-| **Sign Language Interpreter** | `public/images/screenshots/sign-language.png` | Hand landmark visualization, gloss result with confidence bars, alternative interpretations |
-| **Live Captioner** | `public/images/screenshots/captioner.png` | Live transcript with speaker labels, status indicators, font size and contrast controls |
-| **Derma-Scan** | `public/images/screenshots/derma-scan.png` | Image upload zone, triage tier indicator, plain-language observation, confidence badge |
+![Homepage](public/images/screenshots/homepage.png)
 
-> **To capture screenshots:** Run `npm run dev`, navigate to each tool page, and take a screenshot. Save to `public/images/screenshots/`.
+| Tool | Screenshot | Description |
+|------|------------|-------------|
+| **Sign Language Interpreter** | ![Sign Language](public/images/screenshots/sign-language.png) | Hand landmark visualization, gloss result with confidence bars, alternative interpretations |
+| **Live Captioner** | ![Captioner](public/images/screenshots/captioner.png) | Live transcript with speaker labels, status indicators, font size and contrast controls |
+| **Derma-Scan** | ![Derma-Scan](public/images/screenshots/derma-scan.png) | Image upload zone, triage tier indicator, plain-language observation, confidence badge |
 
 The homepage also embeds product preview components (`CaptionerPreview`, `DermaScanPreview`, `SignLanguagePreview`) that render realistic mock UIs of each tool directly on the landing page feature cards.
 
