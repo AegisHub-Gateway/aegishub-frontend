@@ -4,20 +4,20 @@
    Never hardcode hex values in components — use these custom properties only.
 ───────────────────────────────────────────────────────────────────────────── */
 
+/* ── Light mode (zinc-50 soft neutrals) ────────────────────────────────────── */
 :root {
-  /* ── Surface & Background ─────────────────────────────────────────────── */
-  --color-bg:              #F7F8FA;
+  --color-bg:              #FAFAFA;
   --color-surface:         #FFFFFF;
   --color-surface-raised:  #FFFFFF;
-  --color-surface-subtle:  #F0F1F5;
-  --color-border:          #E3E5EC;
-  --color-border-strong:   #C8CAD6;
+  --color-surface-subtle:  #F4F4F5;
+  --color-border:          #E4E4E7;
+  --color-border-strong:   #D4D4D8;
 
   /* ── Text ─────────────────────────────────────────────────────────────── */
-  --color-text-primary:    #0D1014;
-  --color-text-secondary:  #525666;
-  --color-text-muted:      #8C90A0;
-  --color-text-inverse:    #FFFFFF;
+  --color-text-primary:    #18181B;
+  --color-text-secondary:  #71717A;
+  --color-text-muted:      #A1A1AA;
+  --color-text-inverse:    #FAFAFA;
 
   /* ── Brand Accent — Teal ──────────────────────────────────────────────── */
   --color-accent:          #009C7A;
@@ -108,19 +108,19 @@
   --ease-out:        cubic-bezier(0, 0, 0.2, 1);
 }
 
-/* ── Dark mode ───────────────────────────────────────────────────────────── */
+/* ── Dark mode (zinc-900 soft neutrals) ───────────────────────────────────── */
 .dark {
-  --color-bg:              #0B0C0F;
-  --color-surface:         #14161C;
-  --color-surface-raised:  #1C1F28;
-  --color-surface-subtle:  #1C1F28;
-  --color-border:          #282C3A;
-  --color-border-strong:   #363B4D;
+  --color-bg:              #18181B;
+  --color-surface:         #27272A;
+  --color-surface-raised:  #3F3F46;
+  --color-surface-subtle:  #3F3F46;
+  --color-border:          #3F3F46;
+  --color-border-strong:   #52525B;
 
-  --color-text-primary:    #EEF0F6;
-  --color-text-secondary:  #8C90A0;
-  --color-text-muted:      #525666;
-  --color-text-inverse:    #0D1014;
+  --color-text-primary:    #FAFAFA;
+  --color-text-secondary:  #A1A1AA;
+  --color-text-muted:      #71717A;
+  --color-text-inverse:    #18181B;
 
   /* Accent unchanged in dark */
   --color-accent:          #009C7A;

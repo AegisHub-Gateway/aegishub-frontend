@@ -72,7 +72,7 @@ const AppHeader: React.FC = () => {
       <div className="flex items-center gap-2">
         {/* Theme toggle */}
         <button
-          onClick={toggleTheme}
+          onClick={(e) => toggleTheme(e)}
           className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors duration-200"
           style={{ color: "var(--color-text-secondary)" }}
           aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
