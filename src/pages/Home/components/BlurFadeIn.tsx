@@ -23,7 +23,9 @@ interface BlurFadeInProps {
 }
 
 function tokenize(text: string): string[] {
-  return text.includes(" ") ? text.split(" ") : text.split("");
+  if (!text.includes(" ")) return text.split("");
+  const words = text.split(" ");
+  return words.map((w, i) => (i < words.length - 1 ? w + " " : w));
 }
 
 export default function BlurFadeIn({

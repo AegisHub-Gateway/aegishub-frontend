@@ -6,6 +6,7 @@ import ProductPreview from "./components/ProductPreview";
 import HomeFooter from "./components/HomeFooter";
 import BlurFadeIn from "./components/BlurFadeIn";
 import Aurora from "./components/Aurora";
+import PulseRing from "./components/PulseRing";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    AegisHub — Complete Homepage
@@ -100,18 +101,19 @@ function HeroContent() {
         style={{
           fontSize: "clamp(34px, 7.5vw, 70px)",
           lineHeight: 1.05,
-          fontWeight: 400,
+          fontWeight: 600,
           letterSpacing: "-0.025em",
-          fontFamily: "var(--font-body)",
+          fontFamily: "var(--font-heading)",
         }}
       >
         <BlurFadeIn
-          text="Making healthcare "
+          text="Making healthcare"
           delay={0.3}
           stagger={0.08}
           loop
         />
-        <span style={{ fontStyle: "italic", fontWeight: 400, letterSpacing: "-0.01em" }}>
+        {" "}
+        <span style={{ fontFamily: "var(--font-body)", fontStyle: "italic", fontWeight: 400, letterSpacing: "-0.01em" }}>
           <BlurFadeIn
             text="accessible"
             delay={0.6}
@@ -130,22 +132,26 @@ function HeroContent() {
 
       <p
         className="mt-4 max-w-xl px-2 text-white/60 sm:mt-5"
-        style={{ fontSize: "clamp(14px, 3.2vw, 17px)", fontFamily: "var(--font-body)", lineHeight: 1.65, fontWeight: 400 }}
+        style={{ fontSize: "clamp(14px, 3.2vw, 17px)", fontFamily: "var(--font-heading)", lineHeight: 1.65, fontWeight: 300 }}
       >
         Sign language interpretation, live clinical captions, and AI-assisted
         skin analysis — in one platform, with your data staying in your browser.
       </p>
 
-      <Link
-        to="/signup"
-        className="mt-7 inline-flex items-center gap-3 rounded-full bg-[#009C7A] py-2.5 pl-7 pr-2 text-[14px] font-semibold text-white transition-all duration-200 hover:bg-[#00B389] hover:shadow-lg hover:shadow-[#009C7A]/25 focus-ring sm:mt-8 sm:py-3 sm:pl-8"
-        style={{ fontFamily: "var(--font-heading)" }}
-      >
-        Get started free
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 sm:h-8 sm:w-8">
-          <IcoChevronRight />
-        </span>
-      </Link>
+      <div className="mt-7 sm:mt-8">
+        <PulseRing>
+          <Link
+            to="/signup"
+            className="inline-flex items-center gap-3 rounded-full bg-[#009C7A] py-2.5 pl-7 pr-2 text-[14px] font-semibold text-white transition-all duration-200 hover:bg-[#00B389] hover:shadow-lg hover:shadow-[#009C7A]/25 focus-ring sm:py-3 sm:pl-8"
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
+            Get started free
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 sm:h-8 sm:w-8">
+              <IcoChevronRight />
+            </span>
+          </Link>
+        </PulseRing>
+      </div>
 
       <div className="mt-5 flex items-center gap-5">
         <Link to="/help" className="text-[13px] text-white/50 underline underline-offset-2 transition-colors hover:text-white/80 focus-ring rounded"
@@ -235,16 +241,18 @@ function SectionIntro() {
                 </li>
               ))}
             </ul>
-            <Link
-              to="/signup"
-              className="inline-flex items-center gap-2.5 rounded-full bg-gray-900 py-2.5 pl-6 pr-2 text-[14px] font-medium text-white transition-all duration-200 hover:bg-gray-800 focus-ring"
-              style={{ fontFamily: "var(--font-heading)" }}
-            >
-              Try AegisHub free
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/15">
-                <IcoChevronRight />
-              </span>
-            </Link>
+            <PulseRing>
+              <Link
+                to="/signup"
+                className="inline-flex items-center gap-2.5 rounded-full bg-gray-900 py-2.5 pl-6 pr-2 text-[14px] font-medium text-white transition-all duration-200 hover:bg-gray-800 focus-ring"
+                style={{ fontFamily: "var(--font-heading)" }}
+              >
+                Try AegisHub free
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/15">
+                  <IcoChevronRight />
+                </span>
+              </Link>
+            </PulseRing>
           </div>
         </div>
       </div>
@@ -357,16 +365,18 @@ function SectionTools() {
               ))}
             </ul>
             <div className="mt-8">
-              <Link
-                to="/sign-interpreter"
-                className="inline-flex items-center gap-2.5 rounded-full bg-[#009C7A] py-2 pl-5 pr-2 text-[13px] font-medium text-white transition-all duration-200 hover:bg-[#00B389] focus-ring"
-                style={{ fontFamily: "var(--font-heading)" }}
-              >
-                Open interpreter
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
-                  <IcoChevronRight s={12} />
-                </span>
-              </Link>
+              <PulseRing>
+                <Link
+                  to="/sign-interpreter"
+                  className="inline-flex items-center gap-2.5 rounded-full bg-[#009C7A] py-2 pl-5 pr-2 text-[13px] font-medium text-white transition-all duration-200 hover:bg-[#00B389] focus-ring"
+                  style={{ fontFamily: "var(--font-heading)" }}
+                >
+                  Open interpreter
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
+                    <IcoChevronRight s={12} />
+                  </span>
+                </Link>
+              </PulseRing>
             </div>
           </article>
 
@@ -825,23 +835,27 @@ function SectionFinalCTA() {
             </p>
 
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-              <Link
-                to="/signup"
-                className="inline-flex items-center gap-3 rounded-full bg-[#009C7A] py-2.5 pl-7 pr-2 text-[14px] font-semibold text-white transition-all duration-200 hover:bg-[#00B389] hover:shadow-lg hover:shadow-[#009C7A]/25 focus-ring"
-                style={{ fontFamily: "var(--font-heading)" }}
-              >
-                Create free account
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20">
-                  <IcoChevronRight />
-                </span>
-              </Link>
-              <Link
-                to="/dashboard"
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 px-6 py-2.5 text-[14px] font-medium text-white/80 transition-all duration-200 hover:border-white/40 hover:text-white focus-ring"
-                style={{ fontFamily: "var(--font-heading)" }}
-              >
-                Open dashboard
-              </Link>
+              <PulseRing>
+                <Link
+                  to="/signup"
+                  className="inline-flex items-center gap-3 rounded-full bg-[#009C7A] py-2.5 pl-7 pr-2 text-[14px] font-semibold text-white transition-all duration-200 hover:bg-[#00B389] hover:shadow-lg hover:shadow-[#009C7A]/25 focus-ring"
+                  style={{ fontFamily: "var(--font-heading)" }}
+                >
+                  Create free account
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20">
+                    <IcoChevronRight />
+                  </span>
+                </Link>
+              </PulseRing>
+              <PulseRing>
+                <Link
+                  to="/dashboard"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/20 px-6 py-2.5 text-[14px] font-medium text-white/80 transition-all duration-200 hover:border-white/40 hover:text-white focus-ring"
+                  style={{ fontFamily: "var(--font-heading)" }}
+                >
+                  Open dashboard
+                </Link>
+              </PulseRing>
             </div>
 
             <p
