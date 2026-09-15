@@ -1,6 +1,6 @@
 import { useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
-import { useModal } from "../../hooks/useModal";
+import { useModal } from "../../lib/hooks/useModal";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    History — DESIGN.md v1.0
